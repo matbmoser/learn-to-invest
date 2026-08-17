@@ -1,3 +1,21 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { disableLiveMode, enableLiveMode, getQuote } from './market.js'
 import { clearLiveCache, fetchLiveData, getCachedLiveData, LIVE_COMPANIES } from './livedata.js'
@@ -15,7 +33,11 @@ const defaultState = {
   completedLessons: {},
   quizScores: {},
   // API keys never leave this browser except in requests to their own provider
-  settings: { apiKey: '', liveMode: false, anthropicKey: '', mentorModel: 'claude-opus-5' },
+  settings: {
+    apiKey: '', liveMode: false,
+    anthropicKey: '', mentorModel: 'claude-opus-5',
+    theme: 'dark',
+  },
   // AI mentor conversation (most recent chat only)
   mentorHistory: [],
 }
@@ -47,6 +69,11 @@ export function StoreProvider({ children }) {
       // storage may be unavailable (private mode); the app still works in-memory
     }
   }, [state])
+
+  // Theme is stamped on <html> so CSS tokens (and charts) follow it.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', state.settings.theme || 'dark')
+  }, [state.settings.theme])
 
   const { liveMode, apiKey } = state.settings
   useEffect(() => {

@@ -1,7 +1,29 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { findLesson } from '../data/lessons.js'
 import { useStore } from '../lib/store.jsx'
+import {
+  IconArrowLeft, IconArrowRight, IconBulb, IconCheck, IconClock,
+  IconExample, IconQuiz, IconTrophy, IconWarning, IconX,
+} from '../components/icons.jsx'
 
 // tiny inline-markup renderer: **bold**, *italic*, `code`
 function rich(text) {
@@ -31,14 +53,16 @@ function Block({ b }) {
     case 'callout':
       return (
         <div className={'callout' + (b.warn ? ' warn' : '')}>
-          <div className="callout-title">{b.warn ? '⚠️' : '💡'} {b.title}</div>
+          <div className="callout-title">
+            {b.warn ? <IconWarning size={16} /> : <IconBulb size={16} />} {b.title}
+          </div>
           <div>{rich(b.text)}</div>
         </div>
       )
     case 'example':
       return (
         <div className="example-box">
-          <div className="ex-title">📝 {b.title}</div>
+          <div className="ex-title"><IconExample size={13} /> {b.title}</div>
           <div>{rich(b.text)}</div>
         </div>
       )
@@ -75,7 +99,7 @@ function Quiz({ mod }) {
 
   return (
     <div className="card" style={{ marginTop: 24 }}>
-      <h2 style={{ marginTop: 0 }}>🧪 Module quiz: {mod.title}</h2>
+      <h2 style={{ marginTop: 0 }}><IconQuiz size={19} /> Module quiz: {mod.title}</h2>
       {state.quizScores[mod.id] != null && (
         <p className="small secondary">Your best score so far: {state.quizScores[mod.id]}%</p>
       )}
@@ -89,9 +113,9 @@ function Quiz({ mod }) {
               else if (answers[qi] === oi) cls += ' incorrect'
             }
             return (
-              <button key={oi} className={cls}
+              <button key={oi}
+                className={cls + (answers[qi] === oi && !submitted ? ' selected' : '')}
                 disabled={submitted}
-                style={answers[qi] === oi && !submitted ? { borderColor: 'var(--accent)', background: 'var(--accent-wash)' } : undefined}
                 onClick={() => setAnswers((a) => ({ ...a, [qi]: oi }))}>
                 {opt}
               </button>
@@ -99,7 +123,9 @@ function Quiz({ mod }) {
           })}
           {submitted && (
             <p className="small secondary" style={{ marginTop: 6 }}>
-              {answers[qi] === q.answer ? '✅ Correct. ' : '❌ '} {q.explain}
+              {answers[qi] === q.answer
+                ? <><IconCheck size={13} /> Correct. </>
+                : <><IconX size={13} /> </>}{q.explain}
             </p>
           )}
         </div>
@@ -111,8 +137,8 @@ function Quiz({ mod }) {
       ) : (
         <div>
           <p style={{ fontWeight: 600 }} className={pct >= 80 ? 'up' : undefined}>
-            Score: {correct}/{mod.quiz.length} ({pct}%)
-            {pct >= 80 ? ' — module mastered! 🎉' : ' — review the lessons above and retry.'}
+            {pct >= 80 && <IconTrophy size={16} />}{' '}Score: {correct}/{mod.quiz.length} ({pct}%)
+            {pct >= 80 ? ' — module mastered' : ' — review the lessons above and retry.'}
           </p>
           <button onClick={() => { setSubmitted(false); setAnswers({}) }}>Try again</button>
         </div>
@@ -144,24 +170,27 @@ export default function Lesson() {
         <Link to="/learn">Academy</Link> · {mod.emoji} {mod.title} · Lesson {idx + 1} of {mod.lessons.length}
       </p>
       <h1>{lesson.title}</h1>
-      <p className="small muted">⏱ about {lesson.minutes} min {done && <span className="up">· ✓ completed</span>}</p>
+      <p className="small muted">
+        <IconClock size={13} /> about {lesson.minutes} min{' '}
+        {done && <span className="up">· <IconCheck size={13} /> completed</span>}
+      </p>
 
       <div className="lesson-body">
         {lesson.content.map((b, i) => <Block b={b} key={i} />)}
       </div>
 
       <div className="row" style={{ marginTop: 28 }}>
-        {prev && <Link to={`/learn/${mod.id}/${prev.id}`}><button>← {prev.title}</button></Link>}
+        {prev && <Link to={`/learn/${mod.id}/${prev.id}`}><button><IconArrowLeft size={15} /> {prev.title}</button></Link>}
         {!done && (
           <button className="primary" onClick={() => completeLesson(lesson.id)}>
-            Mark as completed ✓
+            <IconCheck size={15} /> Mark as completed
           </button>
         )}
         {next && (
           <Link to={`/learn/${mod.id}/${next.id}`}>
             <button className={done ? 'primary' : ''}
               onClick={() => completeLesson(lesson.id)}>
-              Next: {next.title} →
+              Next: {next.title} <IconArrowRight size={15} />
             </button>
           </Link>
         )}

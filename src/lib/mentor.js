@@ -1,3 +1,21 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 // The AI mentor: a senior investment analyst you can ask questions.
 //
 // Calls the Claude API directly from the browser with the user's own API key
@@ -7,7 +25,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { getCompanies, getFundamentals, getQuote, getSeries, healthScore, isLiveMode } from './market.js'
-import { annualizedVol, macd, maxDrawdown, rsi, sma } from './indicators.js'
+import { adx, annualizedVol, atr, macd, maxDrawdown, obv, rsi, sma } from './indicators.js'
 import { MODULES } from '../data/lessons.js'
 import { fmtMoney, fmtPct } from './format.js'
 
@@ -37,7 +55,7 @@ You have two decades of experience covering companies: reading financial stateme
 # How to teach
 Answer the question that was asked, then teach the transferable principle behind it. When the user asks about a specific company or trade, walk through your reasoning in the order an analyst would: what the business does, what the numbers say, what the price assumes, what the chart says about timing, and what could go wrong. Show the arithmetic when a number matters — a beginner learns more from "20 ÷ 4 = a P/E of 5" than from the conclusion alone.
 
-Use the app's own curriculum as your shared vocabulary. The six modules are: Investing Foundations, Fundamental Analysis, Technical Analysis & Timing, Risk Management, Psychology & Strategy, and Think Like a Business Analyst. When a question maps onto a lesson the user has not done yet, answer it fully first and then point them to the module by name.
+Use the app's own curriculum as your shared vocabulary. The seven modules are: Investing Foundations; Financial Concepts (time value of money, inflation, interest rates and the economy, bonds and yields, risk mathematics, cost of capital, instruments and leverage); Fundamental Analysis; Technical Analysis & Timing; Risk Management; Psychology & Strategy; and Think Like a Business Analyst. When a question maps onto a lesson the user has not done yet, answer it fully first and then point them to the module by name.
 
 When you use data from the CURRENT APP STATE below, say where the number came from so the user learns to find it themselves next time.
 
@@ -112,6 +130,19 @@ export function buildContext(state, summary, focusTicker) {
       if (r[i] != null) lines.push(`RSI(14) ${r[i].toFixed(0)}`)
       if (m.macdLine[i] != null && m.signal[i] != null) {
         lines.push(`MACD ${m.macdLine[i] > m.signal[i] ? 'above' : 'below'} its signal line`)
+      }
+      const a = adx(series)
+      if (a.adx[i] != null) {
+        lines.push(`ADX ${a.adx[i].toFixed(0)} (${a.adx[i] >= 25 ? 'a real trend is present' : 'no real trend — range conditions'}), ${a.plusDI[i] > a.minusDI[i] ? '+DI' : '-DI'} on top`)
+      }
+      const at = atr(series)
+      if (at[i] != null) lines.push(`ATR ${at[i].toFixed(2)} (about ${((at[i] / q.price) * 100).toFixed(1)}% of price — a normal day's range)`)
+      const o = obv(series)
+      const back = Math.min(20, o.length - 1)
+      if (o[i] != null && o[i - back] != null) {
+        const obvUp = o[i] > o[i - back]
+        const priceUp = closes[i] > closes[i - back]
+        lines.push(`OBV over 20 days is ${obvUp ? 'rising' : 'falling'} while price is ${priceUp ? 'rising' : 'falling'}${obvUp === priceUp ? ' — volume confirms the move' : ' — a volume divergence'}`)
       }
       if (f) {
         lines.push(

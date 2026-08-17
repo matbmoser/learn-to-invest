@@ -1,19 +1,32 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCompany, getFundamentals, getQuote, getSeries, healthScore } from '../lib/market.js'
-import { annualizedVol, bollinger, ema, macd, maxDrawdown, rsi, sma } from '../lib/indicators.js'
+import { adx, annualizedVol, atr, macd, maxDrawdown, obv, rsi, sma } from '../lib/indicators.js'
 import { portfolioSummary, useStore } from '../lib/store.jsx'
 import { fmtBillions, fmtMoney, fmtNum, fmtPct } from '../lib/format.js'
-import { ChartLegend, Meter, TimeSeriesChart } from '../components/charts.jsx'
-
-const RANGES = { '3M': 63, '6M': 126, '1Y': 252, 'All': Infinity }
-
-const OVERLAYS = [
-  { key: 'sma20', label: 'SMA 20', color: 'var(--series-2)' },
-  { key: 'sma50', label: 'SMA 50', color: 'var(--series-7)' },
-  { key: 'ema12', label: 'EMA 12', color: 'var(--series-5)' },
-  { key: 'boll', label: 'Bollinger', color: 'var(--series-1)' },
-]
+import { Meter } from '../components/charts.jsx'
+import StockChart from '../components/StockChart.jsx'
+import {
+  IconClipboard, IconCompass, IconMentor, IconPulse, IconTrade, IconWarning,
+} from '../components/icons.jsx'
 
 function TradePanel({ ticker }) {
   const { state, buy, sell } = useStore()
@@ -38,7 +51,7 @@ function TradePanel({ ticker }) {
 
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>💵 Practice trade</h3>
+      <h3 style={{ marginTop: 0 }}><IconTrade size={17} /> Practice trade</h3>
       <div className="small secondary" style={{ marginBottom: 10 }}>
         Cash: <strong>{fmtMoney(state.cash)}</strong>
         {held && <> · You own <strong>{held.shares}</strong> shares (avg {fmtMoney(held.costBasis / held.shares)})</>}
@@ -54,7 +67,7 @@ function TradePanel({ ticker }) {
           Order value: <strong>{fmtMoney(cost)}</strong>
           {n > 0 && positionPctAfter > 10 && (
             <div className="down" style={{ marginTop: 4 }}>
-              ⚠️ After buying, this position would be {positionPctAfter.toFixed(0)}% of your
+              <IconWarning size={13} /> After buying, this position would be {positionPctAfter.toFixed(0)}% of your
               portfolio — above the ~10% beginner guideline from the Risk module.
             </div>
           )}
@@ -76,7 +89,8 @@ function TradePanel({ ticker }) {
   )
 }
 
-function SignalCard({ closes }) {
+function SignalCard({ candles }) {
+  const closes = candles.map((d) => d.close)
   // Educational read of current indicators — with honest framing
   const s20 = sma(closes, 20)
   const s50 = sma(closes, 50)
@@ -129,13 +143,53 @@ function SignalCard({ closes }) {
     })
   }
 
+  // Regime: which toolkit even applies here?
+  const a = adx(candles)
+  if (a.adx[i] != null) {
+    const v = a.adx[i]
+    const trending = v >= 25
+    signals.push({
+      label: `Trend strength (ADX ${v.toFixed(0)})`,
+      state: !trending ? 'range' : a.plusDI[i] > a.minusDI[i] ? 'bullish' : 'bearish',
+      text: trending
+        ? `A genuine trend is in place, favouring ${a.plusDI[i] > a.minusDI[i] ? 'buyers' : 'sellers'} — trend-following tools apply here.`
+        : 'Below 25, so there is no real trend. Moving-average crossovers will whipsaw; range tactics fit better.',
+    })
+  }
+
+  // Volatility, expressed as the thing you actually use it for.
+  const at = atr(candles)
+  if (at[i] != null) {
+    signals.push({
+      label: `Normal daily range (ATR ${at[i].toFixed(2)})`,
+      state: 'neutral',
+      text: `A typical day moves about ${((at[i] / price) * 100).toFixed(1)}% . A 2× ATR stop would sit roughly ${(at[i] * 2).toFixed(2)} from your entry — closer than that and ordinary noise takes you out.`,
+    })
+  }
+
+  // Is volume confirming the move?
+  const o = obv(candles)
+  const back = Math.min(20, o.length - 1)
+  if (o[i] != null && o[i - back] != null) {
+    const obvUp = o[i] > o[i - back]
+    const priceUp = closes[i] > closes[i - back]
+    signals.push({
+      label: 'Volume confirmation (OBV, 20 days)',
+      state: obvUp === priceUp ? (priceUp ? 'bullish' : 'bearish') : 'divergence',
+      text: obvUp === priceUp
+        ? `Price and on-balance volume are both ${priceUp ? 'rising' : 'falling'} — volume is confirming the move.`
+        : `Price is ${priceUp ? 'rising' : 'falling'} while on-balance volume is ${obvUp ? 'rising' : 'falling'} — a divergence worth treating carefully.`,
+    })
+  }
+
   const pillFor = (state) =>
     state === 'bullish' ? 'good-bg' : state === 'bearish' ? 'crit-bg' :
-    state === 'stretched' || state === 'washed-out' ? 'warn-bg' : 'neutral'
+    state === 'stretched' || state === 'washed-out' || state === 'divergence' || state === 'range'
+      ? 'warn-bg' : 'neutral'
 
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>🧭 Indicator read (educational)</h3>
+      <h3 style={{ marginTop: 0 }}><IconCompass size={17} /> Indicator read (educational)</h3>
       {signals.map((s) => (
         <div key={s.label} style={{ marginBottom: 12 }}>
           <div className="row" style={{ gap: 8 }}>
@@ -148,7 +202,8 @@ function SignalCard({ closes }) {
       <p className="small muted" style={{ marginBottom: 0 }}>
         Remember from the <Link to="/learn/technical/buy-sell-signals">Academy</Link>: indicators
         describe probabilities, not certainties. Look for several agreeing (confluence) and always
-        pre-define your exit.
+        pre-define your exit. See every indicator drawn and explained in the{' '}
+        <Link to="/indicators">Indicator reference</Link>.
       </p>
     </div>
   )
@@ -160,7 +215,7 @@ function Fundamentals({ ticker }) {
   if (!f) {
     return (
       <div className="notice" style={{ marginTop: 16 }}>
-        📋 Curated fundamentals and the financial health score are a feature of the{' '}
+        <IconClipboard size={15} /> Curated fundamentals and the financial health score are a feature of the{' '}
         <strong>simulated market</strong>, where the numbers are designed as teaching material.
         For this real stock, look up its financials on your broker or a site like the company's
         investor-relations page — and practice applying the{' '}
@@ -185,7 +240,7 @@ function Fundamentals({ ticker }) {
   return (
     <div className="grid grid-2" style={{ marginTop: 16, alignItems: 'start' }}>
       <div className="card table-wrap">
-        <h3 style={{ marginTop: 0 }}>📋 Fundamentals</h3>
+        <h3 style={{ marginTop: 0 }}><IconClipboard size={17} /> Fundamentals</h3>
         <table>
           <tbody>
             {rows.map(([k, v, help]) => (
@@ -201,7 +256,7 @@ function Fundamentals({ ticker }) {
         </table>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>🩺 Financial health score</h3>
+        <h3 style={{ marginTop: 0 }}><IconPulse size={17} /> Financial health score</h3>
         <div className="row" style={{ marginBottom: 6 }}>
           <span className="stat-value">{h.total}/100</span>
         </div>
@@ -230,9 +285,6 @@ export default function StockDetail() {
   const { ticker } = useParams()
   const { dataVersion } = useStore()
   const c = getCompany(ticker)
-  const [range, setRange] = useState('6M')
-  const [overlays, setOverlays] = useState({ sma20: true, sma50: true })
-  const [panels, setPanels] = useState({ rsi: false, macd: false })
 
   const full = useMemo(() => getSeries(ticker), [ticker, dataVersion])
   const q = getQuote(ticker)
@@ -245,28 +297,6 @@ export default function StockDetail() {
     )
   }
   const fullCloses = full.map((d) => d.close)
-
-  // indicators over the full series, then slice the visible window
-  const ind = {
-    sma20: sma(fullCloses, 20),
-    sma50: sma(fullCloses, 50),
-    ema12: ema(fullCloses, 12),
-    boll: bollinger(fullCloses, 20, 2),
-    rsi: rsi(fullCloses, 14),
-    macd: macd(fullCloses),
-  }
-  const n = RANGES[range] === Infinity ? full.length : Math.min(RANGES[range], full.length)
-  const cut = (arr) => arr.slice(full.length - n)
-  const dates = cut(full.map((d) => d.date))
-  const closes = cut(fullCloses)
-
-  const series = [{ name: 'Price', color: 'var(--series-1)', values: closes }]
-  if (overlays.sma20) series.push({ name: 'SMA 20', color: 'var(--series-2)', values: cut(ind.sma20) })
-  if (overlays.sma50) series.push({ name: 'SMA 50', color: 'var(--series-7)', values: cut(ind.sma50) })
-  if (overlays.ema12) series.push({ name: 'EMA 12', color: 'var(--series-5)', values: cut(ind.ema12), dash: true })
-  const band = overlays.boll
-    ? { upper: cut(ind.boll.upper), lower: cut(ind.boll.lower), color: 'var(--series-1)' }
-    : null
 
   const vol = annualizedVol(fullCloses.slice(-252))
   const dd = maxDrawdown(fullCloses.slice(-252))
@@ -289,7 +319,7 @@ export default function StockDetail() {
             {fmtMoney(q.change)} ({fmtPct(q.changePct)}) today
           </div>
           <Link to={`/mentor?stock=${ticker}`}>
-            <button style={{ marginTop: 8 }}>💬 Ask the analyst about {ticker}</button>
+            <button style={{ marginTop: 10 }}><IconMentor size={15} /> Ask the analyst about {ticker}</button>
           </Link>
         </div>
       </div>
@@ -314,61 +344,12 @@ export default function StockDetail() {
       </div>
 
       <div className="card">
-        <div className="row spread">
-          <h3 style={{ margin: 0 }}>Price chart</h3>
-          <div className="range-tabs">
-            {Object.keys(RANGES).map((r) => (
-              <button key={r} className={r === range ? 'active' : ''} onClick={() => setRange(r)}>{r}</button>
-            ))}
-          </div>
-        </div>
-        <div className="toggle-row">
-          {OVERLAYS.map((o) => (
-            <button key={o.key}
-              className={'toggle-chip' + (overlays[o.key] ? ' on' : '')}
-              onClick={() => setOverlays((s) => ({ ...s, [o.key]: !s[o.key] }))}>
-              {o.label}
-            </button>
-          ))}
-          <button className={'toggle-chip' + (panels.rsi ? ' on' : '')}
-            onClick={() => setPanels((s) => ({ ...s, rsi: !s.rsi }))}>RSI panel</button>
-          <button className={'toggle-chip' + (panels.macd ? ' on' : '')}
-            onClick={() => setPanels((s) => ({ ...s, macd: !s.macd }))}>MACD panel</button>
-        </div>
-        <TimeSeriesChart dates={dates} series={series} band={band}
-          height={320} formatValue={(v) => `$${v.toFixed(2)}`} areaFill={series.length === 1} />
-        <ChartLegend items={series.map((s) => ({ name: s.name, color: s.color }))} />
-
-        {panels.rsi && (
-          <>
-            <h3>RSI (14) <span className="small muted">— above 70 overbought, below 30 oversold</span></h3>
-            <TimeSeriesChart dates={dates}
-              series={[{ name: 'RSI', color: 'var(--series-7)', values: cut(ind.rsi) }]}
-              height={140} yDomain={[0, 100]} formatValue={(v) => v.toFixed(0)}
-              refLines={[{ value: 70, label: '70' }, { value: 30, label: '30' }]} />
-          </>
-        )}
-        {panels.macd && (
-          <>
-            <h3>MACD (12, 26, 9) <span className="small muted">— crossovers signal momentum shifts</span></h3>
-            <TimeSeriesChart dates={dates}
-              series={[
-                { name: 'MACD', color: 'var(--series-1)', values: cut(ind.macd.macdLine) },
-                { name: 'Signal', color: 'var(--series-2)', values: cut(ind.macd.signal) },
-              ]}
-              bars={{ name: 'Histogram', values: cut(ind.macd.histogram), posColor: 'var(--series-3)', negColor: 'var(--series-8)' }}
-              height={160} formatValue={(v) => v.toFixed(2)} />
-            <ChartLegend items={[
-              { name: 'MACD', color: 'var(--series-1)' },
-              { name: 'Signal', color: 'var(--series-2)' },
-              { name: 'Histogram', color: 'var(--series-3)' },
-            ]} />
-          </>
-        )}
+        <h3 style={{ marginTop: 0 }}>Price chart</h3>
+        <StockChart series={full} ticker={ticker} />
       </div>
 
       <div className="grid grid-2" style={{ marginTop: 16, alignItems: 'start' }}>
-        <SignalCard closes={fullCloses} />
+        <SignalCard candles={full} />
         <TradePanel ticker={ticker} />
       </div>
 

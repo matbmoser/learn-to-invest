@@ -2,6 +2,13 @@
   "name": "learn-to-invest",
   "private": true,
   "version": "1.0.0",
+  "description": "Learn stock investing from zero: an academy, a paper-trading simulator, and an AI analyst mentor.",
+  "author": "Mathias Brunkow Moser",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matbmoser/learn-to-invest.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +17,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
+    "lightweight-charts": "^5.2.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.0"

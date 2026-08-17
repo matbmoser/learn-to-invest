@@ -1,3 +1,21 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 export const GLOSSARY = [
   { term: 'Ask', def: 'The lowest price a seller is currently willing to accept for a stock.' },
   { term: 'Bear market', def: 'A decline of 20% or more from a recent peak, usually with widespread pessimism.' },
@@ -47,5 +65,51 @@ export const GLOSSARY = [
   { term: 'Value trap', def: 'A stock that looks cheap on ratios but is cheap because the business is genuinely deteriorating.' },
   { term: 'Volatility', def: 'How violently a price swings. Higher volatility = wider possible outcomes = position sizes should shrink.' },
   { term: 'Volume', def: 'Shares traded in a period. High volume = conviction behind the move; low volume = fragile moves.' },
+  { term: 'Basis point', def: 'One hundredth of a percentage point. A rate moving from 4.00% to 4.25% rose 25 basis points ("bps").' },
+  { term: 'Beta', def: "A stock's sensitivity to the market. Beta 1 moves with the index; 1.5 amplifies moves by half again; below 1 is defensive." },
+  { term: 'Bond', def: 'A tradable loan. The issuer pays a fixed coupon and returns the principal at maturity. Prices move inversely to yields.' },
+  { term: 'CAPM', def: 'Capital Asset Pricing Model: required return = risk-free rate + beta × equity risk premium. Turns risk into a return hurdle.' },
+  { term: 'Correlation', def: 'How closely two assets move together, from -1 to +1. Diversification works because correlations are below 1 — though they rise toward 1 in crises.' },
+  { term: 'Cost of equity', def: 'The return shareholders require for the risk of owning the stock. Not a cash payment, but a real economic cost.' },
+  { term: 'Coupon', def: "A bond's fixed annual interest payment, expressed as a percentage of face value." },
+  { term: 'Discounting', def: 'Converting a future amount into what it is worth today, at a chosen rate. The core operation of all valuation.' },
+  { term: 'Duration', def: "How much a bond's price moves when rates change. Duration 7 means roughly a 7% price fall per 1-point rate rise." },
+  { term: 'Equity risk premium', def: 'The extra return investors demand for owning stocks instead of risk-free government bonds.' },
+  { term: 'Expense ratio', def: "A fund's annual fee as a percentage of assets. 1% a year can consume roughly a quarter of your wealth over 30 years." },
+  { term: 'Futures', def: 'A binding contract to buy or sell an asset at a set price on a set date. Leveraged, and used both to hedge and to speculate.' },
+  { term: 'Inflation', def: 'The rate at which prices rise and each unit of currency buys less. Measured by indexes such as the CPI.' },
+  { term: 'Margin call', def: 'A broker demand for more collateral when a leveraged position falls too far. Unmet, the broker sells your positions — usually at the worst moment.' },
+  { term: 'Market maker', def: 'A firm continuously quoting a bid and an ask, providing liquidity and earning the spread.' },
+  { term: 'Nominal vs real', def: 'Nominal is the headline number; real subtracts inflation. A 9% return in a 7% inflation year is a 2% real gain.' },
+  { term: 'NPV', def: 'Net present value: the sum of a project\'s future cash flows discounted to today, minus its cost. Positive NPV creates value.' },
+  { term: 'Option (call / put)', def: 'The right, not obligation, to buy (call) or sell (put) at a set price by a set date. Unlike a stock, it can expire worthless.' },
+  { term: 'Present value', def: 'What a future sum is worth today once discounted: PV = FV ÷ (1 + r)^n.' },
+  { term: 'Risk-free rate', def: 'The return available with essentially no risk, normally a government bond yield. The benchmark every investment must beat.' },
+  { term: 'ROIC', def: 'Return on invested capital — what a company earns on the money deployed in the business. Above WACC it creates value; below, growth destroys it.' },
+  { term: 'Rule of 72', def: 'A shortcut: 72 ÷ annual return ≈ years for money to double. At 8%, about nine years.' },
+  { term: 'Sharpe ratio', def: 'Return above the risk-free rate per unit of volatility. Compares investments on risk-adjusted terms; above 1 is generally good.' },
+  { term: 'Short selling', def: 'Borrowing shares to sell now and buy back later, profiting if the price falls. Losses are theoretically unlimited.' },
+  { term: 'Time value of money', def: 'A dollar today is worth more than a dollar tomorrow, because today\'s dollar can be put to work.' },
+  { term: 'WACC', def: 'Weighted average cost of capital — the blended cost of debt and equity, and the hurdle every internal project must clear.' },
+  { term: 'Yield curve', def: 'Bond yields plotted against maturity. Normally upward sloping; an inverted curve has preceded most recessions.' },
+  { term: 'Yield to maturity', def: "The total annualized return from holding a bond to maturity, counting every coupon and the return of principal." },
+  { term: 'ADX', def: 'Average Directional Index — measures trend STRENGTH from 0-100, not direction. Below 20 means no trend (use range tactics); above 25 means trend tools apply.' },
+  { term: 'ATR', def: 'Average True Range — the average daily price range in dollars, including gaps. The standard basis for stop distance and position sizing.' },
+  { term: 'CCI', def: 'Commodity Channel Index — how far price has strayed from its average in units of mean deviation. Unbounded; ±100 are conventional thresholds.' },
+  { term: 'Divergence', def: 'Price makes a new extreme while an indicator does not, signalling the force behind the move is fading. The highest-value oscillator signal.' },
+  { term: 'Donchian channel', def: 'The highest high and lowest low of the last N days — support and resistance made mechanical, and the basis of classic breakout systems.' },
+  { term: 'Keltner channel', def: 'An envelope built from ATR around an EMA. Steadier than Bollinger; a close outside is a more reliable breakout signal.' },
+  { term: 'Lagging indicator', def: 'Confirms what already happened (moving averages, MACD, ADX). Reliable but late.' },
+  { term: 'Leading indicator', def: 'Attempts to signal before price moves (RSI, Stochastic, OBV). Timely but noisy — expect false alarms.' },
+  { term: 'MFI', def: 'Money Flow Index — RSI weighted by volume, so it measures conviction as well as direction. Bounded 0-100.' },
+  { term: 'OBV', def: 'On-Balance Volume — a running total adding volume on up days and subtracting on down days. Only its direction matters.' },
+  { term: 'Oscillator', def: 'An indicator plotted in its own pane on a bounded or zero-centred scale (RSI, Stochastic, MACD), as opposed to an overlay drawn on price.' },
+  { term: 'Overlay', def: 'An indicator drawn on the price axis itself — moving averages, Bollinger Bands, VWAP, Parabolic SAR.' },
+  { term: 'Parabolic SAR', def: 'A trailing stop that accelerates with the trend and flips side when price crosses it. Excellent as an exit, poor as an entry.' },
+  { term: 'ROC', def: 'Rate of Change — the plain percentage change over N days. The simplest momentum measure, and directly comparable across stocks.' },
+  { term: 'Squeeze', def: 'Volatility compressing — classically Bollinger Bands contracting inside the Keltner channel. Signals a large move is coming, but not its direction.' },
+  { term: 'Stochastic oscillator', def: 'Measures where the close sits inside the recent high-low range, 0-100. Best in range-bound markets; pins at extremes in trends.' },
+  { term: 'VWAP', def: 'Volume-weighted average price — the average price actually paid. Above it the average buyer is in profit; institutions benchmark against it.' },
+  { term: 'Williams %R', def: 'The stochastic mirrored onto a -100 to 0 scale. Mathematically %K - 100, so running both adds no information.' },
   { term: 'Yield', def: 'Annual income (dividends or interest) as a % of price.' },
 ]

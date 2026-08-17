@@ -1,8 +1,27 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 import { Link, useNavigate } from 'react-router-dom'
 import { getCompany } from '../lib/market.js'
 import { portfolioSummary, STARTING_CASH, useStore } from '../lib/store.jsx'
 import { fmtMoney, fmtPct } from '../lib/format.js'
 import { AllocationBars } from '../components/charts.jsx'
+import { IconPortfolio, IconShield, IconThumbsUp, IconWarning } from '../components/icons.jsx'
 
 const SERIES = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(--series-4)',
   'var(--series-5)', 'var(--series-6)', 'var(--series-7)', 'var(--series-8)']
@@ -30,7 +49,7 @@ function diversificationFeedback(positions, total) {
     notes.push({ warn: false, text: `You hold ${positions.length} stock${positions.length > 1 ? 's' : ''}. The Risk module suggests 10–20 across different sectors for real diversification.` })
   }
   if (notes.length === 0) {
-    notes.push({ warn: false, text: 'No concentration flags — position and sector sizes look reasonably balanced. 👍' })
+    notes.push({ warn: false, text: 'No concentration flags — position and sector sizes look reasonably balanced.' })
   }
   return notes
 }
@@ -57,7 +76,7 @@ export default function Portfolio() {
 
   return (
     <div>
-      <h1>💼 Your practice portfolio</h1>
+      <h1><IconPortfolio size={24} /> Your practice portfolio</h1>
       <p className="subtitle">
         Track your virtual positions exactly like a real brokerage would — and get the
         diversification feedback a good advisor should give you.
@@ -133,10 +152,10 @@ export default function Portfolio() {
               <h3 style={{ marginTop: 0 }}>Allocation by sector</h3>
               <AllocationBars items={sectorItems} formatValue={(v) => fmtMoney(v, 0)} />
               <hr className="divider" />
-              <h3 style={{ marginTop: 0 }}>🛡️ Diversification check</h3>
+              <h3 style={{ marginTop: 0 }}><IconShield size={17} /> Diversification check</h3>
               {notes.map((note, i) => (
                 <p key={i} className={'small ' + (note.warn ? 'down' : 'secondary')} style={{ marginBottom: 8 }}>
-                  {note.warn ? '⚠️ ' : '✔️ '}{note.text}
+                  {note.warn ? <IconWarning size={14} /> : <IconThumbsUp size={14} />} {note.text}
                 </p>
               ))}
             </div>

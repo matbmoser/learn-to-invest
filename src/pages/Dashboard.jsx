@@ -1,9 +1,28 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 import { Link } from 'react-router-dom'
 import { MODULES, moduleProgress } from '../data/lessons.js'
 import { getCompanies, getQuote, getSeries, isLiveMode } from '../lib/market.js'
 import { portfolioSummary, useStore } from '../lib/store.jsx'
 import { fmtMoney, fmtPct } from '../lib/format.js'
 import { Sparkline } from '../components/charts.jsx'
+import { Icon, IconArrowRight, IconTrophy, IconWarning } from '../components/icons.jsx'
 
 export default function Dashboard() {
   const { state } = useStore()
@@ -29,7 +48,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1>Welcome back 👋</h1>
+      <h1>Welcome back</h1>
       <p className="subtitle">
         Your path: learn a concept in the <Link to="/learn">Academy</Link>, practice it
         immediately in the <Link to="/market">market simulator</Link> with virtual money, and ask
@@ -46,10 +65,10 @@ export default function Dashboard() {
           </div>
           {nextLesson ? (
             <Link to={`/learn/${nextLesson.mod.id}/${nextLesson.l.id}`}>
-              Continue: {nextLesson.l.title} →
+              Continue: {nextLesson.l.title} <IconArrowRight size={14} />
             </Link>
           ) : (
-            <span className="up">🎉 Curriculum complete!</span>
+            <span className="up"><IconTrophy size={15} /> Curriculum complete</span>
           )}
         </div>
 
@@ -61,8 +80,8 @@ export default function Dashboard() {
           </div>
           <div className="small muted" style={{ marginTop: 6 }}>
             {summary.positions.length === 0
-              ? <>You hold only cash. <Link to="/market">Make your first practice trade →</Link></>
-              : <Link to="/portfolio">View portfolio →</Link>}
+              ? <>You hold only cash. <Link to="/market">Make your first practice trade <IconArrowRight size={13} /></Link></>
+              : <Link to="/portfolio">View portfolio <IconArrowRight size={13} /></Link>}
           </div>
         </div>
 
@@ -82,9 +101,12 @@ export default function Dashboard() {
           const quiz = state.quizScores[mod.id]
           return (
             <Link key={mod.id} to={`/learn/${mod.id}/${mod.lessons[0].id}`}
-              className="card" style={{ color: 'inherit', textDecoration: 'none' }}>
+              className="card">
               <div className="row spread">
-                <div style={{ fontWeight: 600 }}>{mod.emoji} {i + 1}. {mod.title}</div>
+                <div className="row" style={{ fontWeight: 600, gap: 9 }}>
+                  <span className="mod-icon"><Icon name={mod.icon} size={17} /></span>
+                  {i + 1}. {mod.title}
+                </div>
                 <span className="pill neutral">{mod.level}</span>
               </div>
               <p className="small secondary" style={{ margin: '8px 0' }}>{mod.description}</p>
@@ -108,7 +130,7 @@ export default function Dashboard() {
           const closes = getSeries(c.ticker).slice(-30).map((d) => d.close)
           return (
             <Link key={c.ticker} to={`/market/${c.ticker}`}
-              className="card" style={{ color: 'inherit', textDecoration: 'none' }}>
+              className="card">
               <div className="row spread">
                 <strong>{c.ticker}</strong>
                 <span className={'small ' + (q.changePct >= 0 ? 'up' : 'down')}>
@@ -124,9 +146,10 @@ export default function Dashboard() {
       </div>
 
       <div className="notice" style={{ marginTop: 24 }}>
-        ⚠️ Educational simulator. All companies and prices here are fictional and generated for
+        <IconWarning size={15} />
+        <span>Educational simulator. All companies and prices here are fictional and generated for
         practice. Nothing in this app is financial advice — when you move to real money, start
-        small, use a regulated broker, and re-read the Risk Management module first.
+        small, use a regulated broker, and re-read the Risk Management module first.</span>
       </div>
     </div>
   )

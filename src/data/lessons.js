@@ -1,3 +1,21 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 // The Academy curriculum. Block types rendered by Lesson.jsx:
 //   { t:'p', text }                       paragraph (**bold** and `code` supported)
 //   { t:'h', text }                       sub-heading
@@ -10,7 +28,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'foundations',
-    emoji: '🌱',
+    icon: 'sprout',
     level: 'Beginner',
     title: 'Investing Foundations',
     description: 'Start from absolute zero: what a stock is, how the market works, and how to set yourself up safely before risking a single dollar.',
@@ -102,32 +120,32 @@ export const MODULES = [
     quiz: [
       {
         q: 'You buy 100 shares of a company that has 1 million shares total. What do you own?',
-        options: ['A loan the company must repay you', '0.01% of the business, including a claim on its profits', 'A guarantee of dividend payments', 'The right to work at the company'],
-        answer: 1,
+        options: ['A loan the company must repay you', 'A guarantee of dividend payments', '0.01% of the business, including a claim on its profits', 'The right to work at the company'],
+        answer: 2,
         explain: 'A share is fractional ownership of the business. Dividends are only paid if the company chooses to; nothing is guaranteed.',
       },
       {
         q: 'Why do stocks generally beat keeping cash under the mattress over decades?',
-        options: ['Stocks never lose value', 'Banks charge fees on cash', 'Compounding growth outpaces inflation over long periods', 'Cash expires after 10 years'],
-        answer: 2,
+        options: ['Compounding growth outpaces inflation over long periods', 'Banks charge fees on cash', 'Stocks never lose value', 'Cash expires after 10 years'],
+        answer: 0,
         explain: 'Stocks swing a lot short-term and can lose value, but historically their compounded returns have outrun inflation over long horizons.',
       },
       {
         q: 'What does a limit order do?',
-        options: ['Buys immediately at any price', 'Only executes at your chosen price or better', 'Limits how many stocks you can own', 'Guarantees your order will fill'],
-        answer: 1,
+        options: ['Buys immediately at any price', 'Guarantees your order will fill', 'Limits how many stocks you can own', 'Only executes at your chosen price or better'],
+        answer: 3,
         explain: 'A limit order controls your price but may never fill. A market order fills fast but at whatever the market offers.',
       },
       {
         q: 'Which money is appropriate to invest in stocks?',
-        options: ['Next month\'s rent', 'Your emergency fund', 'Money you won\'t need for 5+ years', 'A credit card cash advance'],
-        answer: 2,
+        options: ['Next month\'s rent', 'Money you won\'t need for 5+ years', 'Your emergency fund', 'A credit card cash advance'],
+        answer: 1,
         explain: 'Stocks are unpredictable over short periods. Emergency funds and near-term expenses stay in cash; expensive debt gets paid first.',
       },
       {
         q: 'A "bear market" means…',
-        options: ['Prices rose 20% from a low', 'Prices fell 20%+ from a peak', 'The market is closed', 'Only small companies are trading'],
-        answer: 1,
+        options: ['Prices fell 20%+ from a peak', 'Prices rose 20% from a low', 'The market is closed', 'Only small companies are trading'],
+        answer: 0,
         explain: 'Bear = falling (20%+ from a peak), bull = rising. Bears hibernate; bulls charge.',
       },
     ],
@@ -135,8 +153,240 @@ export const MODULES = [
 
   // ------------------------------------------------------------------
   {
+    id: 'concepts',
+    icon: 'finance',
+    level: 'Basic → Advanced',
+    title: 'Financial Concepts',
+    description: 'The financial machinery behind every investment decision: interest and the time value of money, inflation, interest rates and the economy, bonds and yields, the mathematics of risk, cost of capital, and the instruments professionals actually use.',
+    lessons: [
+      {
+        id: 'time-value-of-money',
+        title: 'Interest and the time value of money',
+        minutes: 10,
+        content: [
+          { t: 'p', text: 'One idea sits underneath every valuation, every loan, and every investment decision ever made: **a dollar today is worth more than a dollar tomorrow.** Not because of inflation — that comes next lesson — but because a dollar you hold today can be put to work and become more than a dollar.' },
+          { t: 'h', text: 'Simple vs. compound interest' },
+          { t: 'p', text: '**Simple interest** pays only on your original amount. **Compound interest** pays on your original amount *plus* all the interest already earned — interest earning interest.' },
+          { t: 'example', title: 'The difference over 30 years', text: '$10,000 at 8%. Simple interest: $800 every year, so $34,000 after 30 years. Compound interest: $100,627. The gap — $66,627 — is entirely interest earning interest. Compounding is not a small effect; over long periods it is *the* effect.' },
+          { t: 'h', text: 'The two formulas worth knowing' },
+          { t: 'ul', items: [
+            '**Future value:** `FV = PV × (1 + r)^n` — what a sum today becomes after n periods at rate r.',
+            '**Present value:** `PV = FV ÷ (1 + r)^n` — what a future sum is worth today. This is the same formula run backwards, and it is called **discounting**.',
+          ]},
+          { t: 'p', text: 'Discounting is the single most important operation in finance. When you value a company (the DCF in Module 7), you are estimating the cash it will produce in the future and discounting each year back to today. When a bank prices a mortgage, it is doing the same arithmetic in the other direction.' },
+          { t: 'example', title: 'Discounting in practice', text: 'Someone offers you $10,000 in five years. If you can earn 8% elsewhere, that promise is worth $10,000 ÷ 1.08⁵ = **$6,806** today. Paying more than $6,806 for it makes you worse off than simply investing at 8%. That is the entire logic of valuation in one line.' },
+          { t: 'h', text: 'The Rule of 72' },
+          { t: 'p', text: 'A mental shortcut: **72 ÷ the annual return ≈ years to double.** At 8% money doubles in about 9 years; at 10%, about 7.2 years; at 2%, about 36 years. Run it in the other direction and it tells you what inflation does to your savings.' },
+          { t: 'callout', title: 'Why this matters for investing', text: 'Every disagreement about whether a stock is expensive is ultimately a disagreement about future cash and what discount rate to apply to it. Learn to think in present values and most valuation arguments become legible.' },
+        ],
+      },
+      {
+        id: 'inflation-real-returns',
+        title: 'Inflation, real returns, and what your money actually buys',
+        minutes: 9,
+        content: [
+          { t: 'p', text: '**Inflation** is the rate at which prices rise — equivalently, the rate at which each unit of your currency buys less. It is measured by indexes like the CPI (Consumer Price Index), which track the cost of a basket of typical purchases.' },
+          { t: 'h', text: 'Nominal vs. real' },
+          { t: 'ul', items: [
+            '**Nominal return** — the number on your statement. "My portfolio rose 7%."',
+            '**Real return** — what you actually gained in purchasing power. Roughly: `real ≈ nominal − inflation`. Precisely: `real = (1 + nominal) ÷ (1 + inflation) − 1`.',
+          ]},
+          { t: 'example', title: 'The savings account that loses money', text: 'A savings account paying 2% while inflation runs at 3.5% delivers a **real return of about −1.4%**. The balance grows every year and still buys less every year. This is why "safe" is not the same as "riskless" — cash carries a slow, certain erosion.' },
+          { t: 'h', text: 'Why inflation moves markets' },
+          { t: 'p', text: 'High inflation hurts stocks through two channels. First, central banks raise interest rates to fight it, which raises the discount rate applied to every future cash flow — and higher discount rates mechanically lower present values, hitting long-duration growth companies hardest. Second, input costs rise; companies without pricing power see margins compress.' },
+          { t: 'p', text: 'Companies with a **moat** can raise prices with inflation and protect their margins. That is why pricing power (Module 3) is worth so much more than it sounds.' },
+          { t: 'table', headers: ['Asset', 'Typical behaviour in high inflation'], rows: [
+            ['Cash', 'Loses purchasing power steadily — the clearest loser'],
+            ['Long-dated bonds', 'Fall hard: fixed coupons are worth less, and rates rise'],
+            ['Stocks with pricing power', 'Hold up: revenue rises with prices'],
+            ['Stocks without pricing power', 'Margins compress as costs rise faster than prices'],
+            ['Real assets (property, commodities)', 'Often hold value, since the asset itself reprices'],
+          ]},
+          { t: 'callout', title: 'The habit to build', text: 'Whenever you see a return, ask "nominal or real?" A 9% return in a 7% inflation year is a 2% gain, not a 9% one. Professionals think in real terms almost automatically.' },
+        ],
+      },
+      {
+        id: 'rates-and-economy',
+        title: 'Interest rates, central banks, and the economic cycle',
+        minutes: 10,
+        content: [
+          { t: 'p', text: 'Interest rates are the price of money, and central banks (the Federal Reserve in the US, the ECB in Europe) set the short-term rate that anchors everything else. Understanding this one lever explains most of what moves markets in any given year.' },
+          { t: 'h', text: 'How the lever works' },
+          { t: 'ul', items: [
+            '**Rates up** — borrowing costs more, spending and investment slow, inflation cools. Bonds already issued fall in price; discount rates rise, so stock valuations compress — growth companies most of all.',
+            '**Rates down** — borrowing is cheap, activity picks up, and asset prices generally rise. Cheap money tends to inflate valuations across the board.',
+          ]},
+          { t: 'p', text: 'This is why a strong jobs report can send stocks *down*: it makes rate cuts less likely. Markets price expectations, not events.' },
+          { t: 'h', text: 'The indicators worth following' },
+          { t: 'table', headers: ['Indicator', 'What it tells you'], rows: [
+            ['GDP growth', 'The overall size and direction of the economy'],
+            ['CPI / inflation', 'Price pressure — the main input to rate decisions'],
+            ['Unemployment', 'Labour market slack; low unemployment can mean wage-driven inflation'],
+            ['Policy rate', 'The central bank\'s stance: tightening or loosening'],
+            ['Yield curve', 'The market\'s collective forecast (next lesson)'],
+            ['PMI surveys', 'A fast, forward-looking read on business activity'],
+          ]},
+          { t: 'h', text: 'The cycle, and who does well in each phase' },
+          { t: 'ol', items: [
+            '**Expansion** — growth rising, unemployment falling. Cyclicals and growth companies lead.',
+            '**Peak** — capacity tight, inflation building, central banks tightening. Quality and pricing power matter.',
+            '**Contraction / recession** — demand falls, profits fall. Defensives (staples, healthcare, utilities) hold up best.',
+            '**Trough / recovery** — rates cut, activity bottoms. Cyclicals and small caps typically rebound first.',
+          ]},
+          { t: 'callout', warn: true, title: 'Do not try to trade the cycle', text: 'Knowing where you are in the cycle is useful for understanding *why* your holdings behave as they do, and for setting expectations. It is a very poor timing tool: the market prices its forecast before the data arrives, and forecasters are wrong constantly. Use this to interpret, not to predict.' },
+        ],
+      },
+      {
+        id: 'bonds-and-yields',
+        title: 'Bonds, yields, and the yield curve',
+        minutes: 11,
+        content: [
+          { t: 'p', text: 'A **bond** is a loan you can trade. You lend an issuer (a government or company) a fixed amount, they pay you interest (the **coupon**) on a schedule, and return the principal (the **face value**) at **maturity**. Bonds matter to stock investors even if you never own one, because they set the benchmark every other investment is judged against.' },
+          { t: 'h', text: 'The one relationship everyone must know' },
+          { t: 'p', text: '**Bond prices and yields move in opposite directions.** The coupon is fixed in cash terms, so the only way a bond can offer a competitive return when market rates rise is for its *price* to fall.' },
+          { t: 'example', title: 'Why prices fall when rates rise', text: 'You own a bond paying $50/year on a $1,000 face value — a 5% yield. New bonds are now issued paying 7%. Nobody will pay $1,000 for your 5% bond when they can get 7% elsewhere, so its price drops until the $50 coupon represents a competitive yield — to roughly $714, where $50 ÷ $714 ≈ 7%. You did not do anything wrong; the market repriced around you.' },
+          { t: 'h', text: 'The yields worth distinguishing' },
+          { t: 'ul', items: [
+            '**Coupon rate** — the fixed annual payment as a % of face value. Never changes.',
+            '**Current yield** — annual coupon ÷ current market price.',
+            '**Yield to maturity (YTM)** — the total annualized return if you hold to maturity, including every coupon and the return of principal. This is the number professionals quote.',
+          ]},
+          { t: 'h', text: 'Duration: the sensitivity dial' },
+          { t: 'p', text: '**Duration** measures how much a bond\'s price moves when rates change — roughly, a bond with a duration of 7 loses about 7% if rates rise by 1 percentage point. Longer maturities have longer duration, so 30-year bonds swing far more than 2-year bonds. The same logic applies to stocks: a company whose profits arrive far in the future is a "long-duration" asset and is punished hardest when rates rise.' },
+          { t: 'h', text: 'The yield curve' },
+          { t: 'p', text: 'Plot yields against maturity and you get the **yield curve** — the market\'s aggregate view of the future.' },
+          { t: 'ul', items: [
+            '**Normal (upward sloping)** — longer loans pay more, as you would expect. Signals healthy expectations.',
+            '**Flat** — little difference between short and long rates. Uncertainty.',
+            '**Inverted (downward sloping)** — short rates exceed long rates. It means the market expects rates (and growth) to fall, and it has preceded most recessions — though with lead times of a year or more, which makes it useless for timing.',
+          ]},
+          { t: 'callout', title: 'The link back to stocks', text: 'The government bond yield is the **risk-free rate** — the return available for taking essentially no risk. Every stock must be expected to beat it, plus a premium for the risk you accept. When the risk-free rate rises from 1% to 5%, the entire hurdle for owning stocks rises with it. That single mechanism explains a great deal of market history.' },
+        ],
+      },
+      {
+        id: 'risk-return-math',
+        title: 'Measuring risk: volatility, correlation, beta, and Sharpe',
+        minutes: 11,
+        content: [
+          { t: 'p', text: 'Module 5 taught risk management as behaviour and rules. This lesson gives you the vocabulary professionals use to *measure* it — so you can read a fund factsheet or a research note and know exactly what is being claimed.' },
+          { t: 'h', text: 'Expected return and volatility' },
+          { t: 'p', text: '**Expected return** is the probability-weighted average of outcomes. **Volatility** (standard deviation) measures how widely actual results scatter around that average — it is the standard proxy for risk because it is measurable, though it treats upside and downside surprise identically, which is a real limitation.' },
+          { t: 'example', title: 'Reading a volatility number', text: 'A stock with a 20% annualized volatility and a 10% expected return will, roughly two years in three, land between −10% and +30%. About one year in twenty it falls outside −30% to +50%. This is why position sizing scales with volatility: the same dollar position in a 40%-volatility stock is twice the risk.' },
+          { t: 'h', text: 'Correlation: why diversification works' },
+          { t: 'p', text: '**Correlation** runs from −1 to +1 and measures whether two assets move together. This is the engine behind diversification: combining assets with correlations below 1 produces a portfolio whose volatility is *lower than the average* of its parts. It is the closest thing to a free lunch in finance — and it is why owning five banks is not diversification, since their correlation is near 1.' },
+          { t: 'callout', warn: true, title: 'Correlations rise in crises', text: 'The uncomfortable truth: in a severe sell-off, correlations converge toward 1 and almost everything falls together. Diversification reduces company-specific risk reliably and market risk only partially. Nothing except time horizon and asset allocation protects you from market risk.' },
+          { t: 'h', text: 'Beta and CAPM' },
+          { t: 'p', text: '**Beta** measures a stock\'s sensitivity to the market. Beta 1 moves with the index; beta 1.5 tends to move 50% more in both directions; beta 0.6 is defensive. The **Capital Asset Pricing Model** turns that into a required return:' },
+          { t: 'p', text: '`Expected return = risk-free rate + beta × (market return − risk-free rate)`' },
+          { t: 'example', title: 'CAPM worked through', text: 'Risk-free rate 4%, expected market return 9%, so the equity risk premium is 5%. A stock with beta 1.3 should be expected to return 4% + 1.3 × 5% = **10.5%**. If your analysis says it will return 7%, you are being paid less than the risk warrants — even though 7% sounds fine in isolation.' },
+          { t: 'h', text: 'Risk-adjusted return: the Sharpe ratio' },
+          { t: 'p', text: '`Sharpe = (return − risk-free rate) ÷ volatility`. It answers "how much return per unit of risk?" A fund returning 12% with 20% volatility (Sharpe ≈ 0.4 at a 4% risk-free rate) is *worse* than one returning 9% with 8% volatility (Sharpe ≈ 0.63), because the second earns more per unit of risk taken. Above 1 is generally considered good.' },
+          { t: 'callout', title: 'The point of all this', text: 'Raw returns tell you almost nothing on their own. The moment you ask "compared to what risk, and versus what benchmark?", you are thinking like an analyst instead of a spectator.' },
+        ],
+      },
+      {
+        id: 'cost-of-capital',
+        title: 'Cost of capital, WACC, and how companies create value',
+        minutes: 10,
+        content: [
+          { t: 'p', text: 'Companies fund themselves two ways: **debt** (borrowing) and **equity** (selling ownership). Neither is free, and the blended price they pay is the hurdle every project inside the business must clear. Understanding this tells you whether a company is actually creating value or merely getting bigger.' },
+          { t: 'h', text: 'The two costs' },
+          { t: 'ul', items: [
+            '**Cost of debt** — the interest rate on borrowings, reduced by the tax deduction on interest: `rate × (1 − tax rate)`. Usually the cheaper source.',
+            '**Cost of equity** — the return shareholders require for the risk they bear. Not a cash payment, but a real economic cost. Typically estimated with CAPM from the previous lesson.',
+          ]},
+          { t: 'h', text: 'WACC' },
+          { t: 'p', text: 'The **weighted average cost of capital** blends the two by how much of each the company uses. It is the discount rate in a professional DCF, and it is the minimum return a new factory, acquisition, or product line must earn to be worth doing.' },
+          { t: 'example', title: 'A WACC calculation', text: 'A company is 30% debt at 6% interest with a 25% tax rate, and 70% equity with a 10% cost of equity. After-tax cost of debt = 6% × 0.75 = 4.5%. WACC = (0.30 × 4.5%) + (0.70 × 10%) = 1.35% + 7% = **8.35%**. Any project returning less than 8.35% destroys value, however profitable it looks in isolation.' },
+          { t: 'h', text: 'The value-creation test' },
+          { t: 'p', text: '**ROIC** (return on invested capital) is what the company actually earns on the money deployed in the business. Compare it to WACC and you get the cleanest one-line verdict in fundamental analysis:' },
+          { t: 'ul', items: [
+            '**ROIC > WACC** — every dollar reinvested creates value. Growth is genuinely good, and the company should reinvest as much as it can.',
+            '**ROIC < WACC** — growth *destroys* value. A company like this growing 20% a year is digging its hole faster, and should be returning cash to shareholders instead.',
+          ]},
+          { t: 'callout', title: 'Capital allocation is management\'s real job', text: 'A management team has five uses for cash: reinvest in the business, acquire something, pay down debt, pay dividends, or buy back shares. Judging whether they choose well — reinvesting when ROIC is high, returning cash when it is not — is one of the most valuable and least crowded skills in investing.' },
+          { t: 'p', text: 'This is also why the debt level matters so much (Module 3). Debt lowers WACC up to a point because it is cheap and tax-deductible — but past that point, the risk of financial distress raises both the cost of debt and the cost of equity, and WACC turns back up.' },
+        ],
+      },
+      {
+        id: 'instruments-and-markets',
+        title: 'Funds, derivatives, leverage, and how markets are structured',
+        minutes: 11,
+        content: [
+          { t: 'p', text: 'A working tour of the instruments and plumbing you will meet as you go further. You do not need to use any of these — but you should know what they are, and specifically why the leveraged ones ruin beginners.' },
+          { t: 'h', text: 'Funds: buying a basket' },
+          { t: 'ul', items: [
+            '**Index fund / ETF** — holds an entire index mechanically. Very low fees, no manager risk, trades like a stock. The sensible default core for almost everyone.',
+            '**Active mutual fund** — a manager picks holdings and charges more. Most underperform their index after fees over long periods, which is the single strongest argument for indexing.',
+            '**Expense ratio** — the annual fee. It looks trivial and is not: 1% a year on a portfolio compounding for 30 years consumes roughly a quarter of your final wealth.',
+          ]},
+          { t: 'h', text: 'Derivatives: contracts that derive value from something else' },
+          { t: 'ul', items: [
+            '**Call option** — the right (not obligation) to *buy* at a set price by a set date. You pay a premium. Buyers profit if the price rises enough to cover the premium before expiry.',
+            '**Put option** — the right to *sell* at a set price. Used to hedge a position or to speculate on a fall.',
+            '**Futures** — a binding agreement to buy or sell at a set price on a set date. Used by producers to lock in prices, and by speculators for leverage.',
+          ]},
+          { t: 'p', text: 'Options carry a feature stocks do not: **expiry**. A stock that falls can recover over years; an option that is wrong at expiry is worth exactly zero. Being right about direction but wrong about timing loses everything — which is why most retail option buyers lose money.' },
+          { t: 'h', text: 'Leverage: the amplifier' },
+          { t: 'p', text: '**Margin** is borrowing from your broker to buy more than your cash allows. It multiplies gains and losses equally, and adds a failure mode ordinary investing does not have: the **margin call**. If your collateral falls below a threshold, the broker sells your positions — at the bottom, without asking.' },
+          { t: 'example', title: 'What 2× leverage really does', text: '$10,000 of your own money plus $10,000 borrowed buys $20,000 of stock. A 25% fall means the position is worth $15,000, of which $10,000 is owed — your equity is $5,000. You lost 50% on a 25% move, and you are now likely facing a forced sale. Unleveraged, a 25% drawdown is a bad year you simply wait out.' },
+          { t: 'h', text: '**Short selling**' },
+          { t: 'p', text: 'Borrowing shares, selling them, and hoping to buy back cheaper. The asymmetry is brutal and worth internalizing: a long position can only fall to zero (−100%), while a short position has **unlimited** loss, because a stock can rise without bound. This is the same asymmetry that produces short squeezes.' },
+          { t: 'h', text: 'Market plumbing' },
+          { t: 'ul', items: [
+            '**Market makers** — firms quoting both a bid and an ask continuously, providing liquidity and earning the spread.',
+            '**Liquidity** — how easily you can trade without moving the price. Thin liquidity means wide spreads and nasty fills, and it is the hidden risk in small, exotic tickers.',
+            '**Settlement** — trades settle a day or so after execution; the cash is not instantly available.',
+            '**Dark pools and off-exchange venues** — private venues where large institutional orders execute without broadcasting their size.',
+          ]},
+          { t: 'callout', warn: true, title: 'The honest recommendation', text: 'You can build excellent long-term results using nothing from the second half of this lesson. Options, futures, margin, and shorting are tools for people with a specific, tested edge and strict risk controls. Know what they are so nobody can sell you one you do not understand — that is the whole reason this lesson exists.' },
+        ],
+      },
+    ],
+    quiz: [
+      {
+        q: 'You are promised $10,000 in five years and can otherwise earn 8% a year. Roughly what is that promise worth today?',
+        options: ['$10,000 — money is money', 'About $8,000', 'About $14,700', 'About $6,800'],
+        answer: 3,
+        explain: '$10,000 ÷ 1.08⁵ ≈ $6,806. Discounting future cash back to today is the core operation behind every valuation.',
+      },
+      {
+        q: 'Your savings account pays 2% while inflation runs at 3.5%. Your real return is:',
+        options: ['+2%', 'About −1.4%', '+5.5%', 'Zero — cash never loses value'],
+        answer: 1,
+        explain: 'Real return ≈ nominal − inflation. The balance grows while purchasing power shrinks — "safe" is not the same as riskless.',
+      },
+      {
+        q: 'Market interest rates rise sharply. What happens to the price of a bond you already own?',
+        options: ['It rises — bonds like high rates', 'Nothing — bond prices are fixed', 'It falls, because its fixed coupon is now uncompetitive', 'It depends only on the issuer\'s credit rating'],
+        answer: 2,
+        explain: 'Prices and yields move inversely. The coupon is fixed, so only the price can adjust to make the bond competitive with newly issued ones.',
+      },
+      {
+        q: 'Fund A returns 12% with 20% volatility; Fund B returns 9% with 8% volatility. The risk-free rate is 4%. Which has the better risk-adjusted return?',
+        options: ['Fund A — higher return wins', 'They are identical', 'Fund B — a Sharpe ratio of about 0.63 versus 0.40', 'Impossible to say without knowing beta'],
+        answer: 2,
+        explain: 'Sharpe = (return − risk-free) ÷ volatility. A: 8/20 = 0.40. B: 5/8 = 0.63. B earns more return per unit of risk taken.',
+      },
+      {
+        q: 'A company earns an ROIC of 6% while its WACC is 9%. What does growth do?',
+        options: ['Destroys value; the company would do better returning cash to shareholders', 'Creates value — growth is always good', 'Has no effect on value', 'Reduces the cost of equity'],
+        answer: 0,
+        explain: 'When ROIC is below the cost of capital, every reinvested dollar returns less than it costs. Growth accelerates the value destruction.',
+      },
+      {
+        q: 'You buy $20,000 of stock using $10,000 of your own money and $10,000 on margin. The stock falls 25%. What happened to your money?',
+        options: ['You lost 25%', 'Nothing until you sell', 'You lost 25% but the broker absorbs the rest', 'You lost 50% and may face a margin call'],
+        answer: 3,
+        explain: 'The position is worth $15,000 with $10,000 still owed, so your $10,000 equity is now $5,000 — a 50% loss on a 25% move, plus the risk of a forced sale at the worst moment.',
+      },
+    ],
+  },
+
+  // ------------------------------------------------------------------
+  {
     id: 'fundamental',
-    emoji: '🔍',
+    icon: 'search',
     level: 'Beginner–Intermediate',
     title: 'Fundamental Analysis',
     description: 'Learn to read a company like an analyst: financial statements, the key ratios, and a repeatable checklist to judge whether a business is healthy and fairly priced.',
@@ -258,14 +508,14 @@ export const MODULES = [
       },
       {
         q: 'A stock trades at $80 with EPS of $4. Its P/E is…',
-        options: ['4', '76', '20', '320'],
-        answer: 2,
+        options: ['20', '76', '4', '320'],
+        answer: 0,
         explain: 'P/E = price ÷ EPS = 80 ÷ 4 = 20. You pay $20 for each $1 of annual earnings.',
       },
       {
         q: 'A company reports rising profits but free cash flow is negative for the third year. The analyst response is:',
-        options: ['Celebrate — profits are what matter', 'Investigate — earnings without cash is a classic warning sign', 'Ignore it — cash flow is only for banks', 'Buy more before others notice'],
-        answer: 1,
+        options: ['Celebrate — profits are what matter', 'Buy more before others notice', 'Ignore it — cash flow is only for banks', 'Investigate — earnings without cash is a classic warning sign'],
+        answer: 3,
         explain: 'Profit is an accounting result; cash is a fact. Persistent profit-without-cash deserves investigation before investing.',
       },
       {
@@ -286,7 +536,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'technical',
-    emoji: '📈',
+    icon: 'trend',
     level: 'Intermediate',
     title: 'Technical Analysis & Timing',
     description: 'Read price charts, use moving averages, RSI, MACD and Bollinger Bands, and learn what buy/sell signals really mean — including their limits.',
@@ -383,6 +633,142 @@ export const MODULES = [
         ],
       },
       {
+        id: 'indicator-families',
+        title: 'The four families of indicators',
+        minutes: 10,
+        content: [
+          { t: 'p', text: 'There are hundreds of technical indicators, and almost all of them are variations on four ideas. Once you can place any indicator into its family, you stop collecting them and start choosing them.' },
+          { t: 'p', text: 'Every indicator is a **transformation of past price and volume**. None of them contains information the chart does not already hold — they reorganize it so a pattern becomes visible. That is genuinely useful, and it is also the reason no indicator predicts the future.' },
+          { t: 'table', headers: ['Family', 'Question it answers', 'Examples', 'Leading or lagging?'], rows: [
+            ['**Trend**', 'Which way, and how strongly?', 'Moving averages, MACD, ADX, Parabolic SAR', 'Lagging'],
+            ['**Momentum**', 'How fast, and is speed fading?', 'RSI, Stochastic, Williams %R, CCI, ROC', 'Leading'],
+            ['**Volatility**', 'How much movement is normal?', 'Bollinger Bands, ATR, Keltner, Donchian', 'Lagging'],
+            ['**Volume**', 'How much conviction is behind it?', 'OBV, MFI, VWAP, volume bars', 'Leading'],
+          ]},
+          { t: 'h', text: 'Leading vs. lagging — the trade-off you cannot escape' },
+          { t: 'ul', items: [
+            '**Lagging** indicators confirm what already happened. They are reliable but late: by the time a moving average turns up, part of the move is gone. They keep you out of trouble in trends.',
+            '**Leading** indicators try to signal before price moves. They are timely but noisy: for every genuine early warning you get several false alarms.',
+          ]},
+          { t: 'p', text: 'There is no indicator that is both early and reliable. Anyone selling you one is selling you a curve fitted to the past. Accept the trade-off and choose deliberately: lagging tools to define the trend you trade with, leading tools to time entries within it.' },
+          { t: 'h', text: 'Overlays vs. oscillators' },
+          { t: 'p', text: 'The other distinction is where the indicator is *drawn*. **Overlays** share the price axis and sit on top of the candles — moving averages, Bollinger Bands, VWAP, SAR. **Oscillators** live in their own pane below, on their own scale — RSI, MACD, ADX, ATR. If an indicator is in dollars it can overlay price; if it is in percent, a 0–100 range, or arbitrary units, it needs its own pane.' },
+          { t: 'callout', title: 'See every one of them', text: 'The Indicator reference page in this app draws all seventeen indicators on real price data, tells you what each is saying about that chart right now, and explains where each one misleads you. Read this module for the theory, then go and look at them.' },
+        ],
+      },
+      {
+        id: 'oscillators-compared',
+        title: 'Oscillators compared: RSI, Stochastic, Williams %R, CCI',
+        minutes: 10,
+        content: [
+          { t: 'p', text: 'Momentum oscillators all try to answer the same question — *is this move stretched?* — and they mostly disagree at the margins. Knowing what each actually measures tells you which to trust in which conditions.' },
+          { t: 'table', headers: ['Indicator', 'What it measures', 'Scale', 'Extremes'], rows: [
+            ['**RSI**', 'Size of recent gains vs. recent losses', '0 to 100', '70 / 30'],
+            ['**Stochastic**', 'Where the close sits in the recent high-low range', '0 to 100', '80 / 20'],
+            ['**Williams %R**', 'Identical to Stochastic %K, mirrored', '−100 to 0', '−20 / −80'],
+            ['**CCI**', 'Distance from the average, in mean deviations', 'Unbounded', '+100 / −100'],
+            ['**ROC**', 'Plain percentage change over N days', 'Unbounded', 'No fixed levels'],
+          ]},
+          { t: 'callout', warn: true, title: 'The redundancy trap', text: 'Williams %R is exactly the Stochastic %K minus 100 — mathematically the same number on a different scale. Running both and treating agreement as confirmation is counting one opinion twice. This is the single most common way beginners fool themselves: a screen of five oscillators that all say "overbought" is not five votes, it is one vote displayed five ways.' },
+          { t: 'h', text: 'Which to use when' },
+          { t: 'ul', items: [
+            '**Range-bound market:** the Stochastic shines — it catches the swings between support and resistance, and its extremes actually mean-revert.',
+            '**Trending market:** RSI is steadier. Note that in a strong uptrend RSI tends to bottom near 40 rather than 30, so recalibrate what "oversold" means rather than waiting for a reading that never comes.',
+            '**Breakout confirmation:** CCI pushing beyond +100 is often used as confirmation that a move has real force behind it, rather than as a fade signal.',
+            '**Ranking many stocks:** ROC is the standard, because a plain percentage change is directly comparable across names.',
+          ]},
+          { t: 'h', text: 'Divergence: the signal worth waiting for' },
+          { t: 'p', text: 'Across every oscillator, the highest-value pattern is **divergence** — price makes a new high while the oscillator makes a lower high (bearish), or price makes a new low while the oscillator makes a higher low (bullish). It says the force behind the move is fading even though price has not turned yet.' },
+          { t: 'example', title: 'Reading a divergence honestly', text: 'A stock rallies from $80 to $95 to $105. RSI peaks at 78, then 74, then 68. Each new high is being achieved with less momentum — fewer buyers, smaller up-days. That is a warning worth acting on with a tighter stop. It is *not* a short signal: divergences can persist for months in a strong trend, and "early" is indistinguishable from "wrong" until it resolves.' },
+        ],
+      },
+      {
+        id: 'trend-strength-adx',
+        title: 'Trend strength: ADX, and knowing which toolkit applies',
+        minutes: 9,
+        content: [
+          { t: 'p', text: 'Here is the mistake that costs more money than any bad indicator: using trend-following tools in a range, or mean-reversion tools in a trend. Before asking *which way*, ask **is there a trend at all?**' },
+          { t: 'h', text: 'What ADX does' },
+          { t: 'p', text: 'The **Average Directional Index** measures trend strength on a 0–100 scale, without regard to direction. It rises in strong downtrends exactly as it does in strong uptrends. Direction comes from its two companion lines, **+DI** and **−DI**.' },
+          { t: 'table', headers: ['ADX reading', 'Condition', 'Which tools work'], rows: [
+            ['Below 20', 'No trend — choppy range', 'Oscillators (RSI, Stochastic); fade the extremes'],
+            ['20 to 25', 'Trend possibly forming', 'Wait, or trade small'],
+            ['25 to 50', 'Genuine trend in place', 'Moving averages, MACD, breakouts, trailing stops'],
+            ['Above 50', 'Very strong trend', 'Trend tools still work, but the move is often mature'],
+          ]},
+          { t: 'callout', title: 'The regime filter', text: 'This is the most practical use of any indicator in this module: let ADX pick the toolkit. Below 20, moving-average crossovers will whipsaw you to death and oscillator extremes will pay. Above 25, oscillator extremes will stop you out of good trends and trend tools will pay. One reading, and you know which half of your knowledge applies.' },
+          { t: 'h', text: 'Reading +DI and −DI' },
+          { t: 'ul', items: [
+            '+DI above −DI means up-moves have been larger than down-moves: buyers dominate.',
+            'The crossover of +DI and −DI is a directional signal — but only worth acting on when ADX confirms a trend exists.',
+            'A rising ADX with +DI on top is the classic healthy-uptrend signature.',
+          ]},
+          { t: 'h', text: 'Parabolic SAR: the trend-following exit' },
+          { t: 'p', text: 'SAR places a dot that trails price and accelerates as the trend extends, flipping sides when price crosses it. It is a poor entry signal and an excellent **trailing stop** — mechanical, unemotional, and it tightens automatically as a move matures. Pair it with ADX: SAR in a sideways market flips constantly and bleeds money on every whipsaw.' },
+        ],
+      },
+      {
+        id: 'volatility-and-volume-tools',
+        title: 'Volatility and volume: ATR, channels, OBV, MFI and VWAP',
+        minutes: 11,
+        content: [
+          { t: 'p', text: 'Trend and momentum get all the attention, but the two families in this lesson are the ones that actually improve your results — because they set your risk and tell you whether to believe the move.' },
+          { t: 'h', text: 'ATR: the most useful indicator you were not using' },
+          { t: 'p', text: '**Average True Range** is the average daily range in dollars, including overnight gaps. It says nothing about direction, and that is exactly why it is valuable: it tells you what a normal day looks like for this specific stock.' },
+          { t: 'ul', items: [
+            '**Stop placement.** A stop closer than ~1.5× ATR will be hit by ordinary noise. Place stops 1.5–3× ATR beyond your level, and you are only stopped out when something genuinely unusual happens.',
+            '**Position sizing.** Feed the ATR-based stop distance into the position-size formula from the Risk module: wider ATR means fewer shares for the same dollar risk. Risk stays constant while size adapts to the stock.',
+            '**Regime awareness.** Rising ATR means conditions are getting more dangerous whichever way price is going.',
+          ]},
+          { t: 'example', title: 'ATR sizing in practice', text: 'A $50 stock with an ATR of $1.50. A 2× ATR stop sits $3.00 away, at $47. With a $10,000 portfolio risking 1% ($100), you can buy $100 ÷ $3.00 = 33 shares. The same $100 of risk on a stock with a $0.60 ATR ($1.20 stop) allows 83 shares. Same risk, different size — decided by the stock\'s own behaviour rather than a guess.' },
+          { t: 'h', text: 'Three ways to draw a channel' },
+          { t: 'ul', items: [
+            '**Bollinger Bands** — standard deviation around an SMA. Most reactive; best for spotting squeezes, since the bands visibly pinch when volatility collapses.',
+            '**Keltner Channels** — ATR around an EMA. Steadier, and a close outside is a more reliable breakout signal than a Bollinger touch.',
+            '**Donchian Channels** — the plain highest high and lowest low over N days. This is support and resistance made mechanical, and the basis of classic breakout systems.',
+          ]},
+          { t: 'p', text: 'The famous **squeeze** setup combines two of them: when the Bollinger Bands contract *inside* the Keltner channel, volatility is unusually compressed and a large move often follows. The setup tells you a move is coming; it does not tell you the direction.' },
+          { t: 'h', text: 'Volume: the lie detector' },
+          { t: 'ul', items: [
+            '**OBV** adds volume on up days and subtracts it on down days. Only the direction of the line matters. Rising price with a falling OBV means the rally is running on shrinking participation.',
+            '**MFI** is RSI weighted by volume — the same 0–100 scale, but conviction is baked in. When MFI and RSI disagree, the gap between them *is* the volume story.',
+            '**VWAP** is the average price actually paid, weighted by volume. Above it, the average buyer is in profit; below it, underwater. Institutions benchmark their execution against it, which makes it a real magnet level.',
+          ]},
+          { t: 'callout', title: 'Why volume divergence matters', text: 'Price can be pushed around by a small number of trades. Volume shows how much money agreed. A breakout on heavy volume has real sponsorship; the same breakout on thin volume is fragile and reverses far more often. If you add one thing from this lesson to your routine, make it "check the volume before believing the breakout".' },
+        ],
+      },
+      {
+        id: 'indicator-dashboard',
+        title: 'Building an indicator set that does not lie to you',
+        minutes: 10,
+        content: [
+          { t: 'p', text: 'You now know seventeen indicators. The skill is not adding more — it is choosing four that disagree with each other usefully.' },
+          { t: 'h', text: 'The redundancy problem' },
+          { t: 'p', text: 'Indicators within a family are computed from the same inputs, so they mostly move together. Stacking RSI, Stochastic, Williams %R and CCI on one chart feels like a consensus when all four flash overbought. It is not a consensus — it is one measurement rendered four times, and it will be confidently wrong all at once.' },
+          { t: 'callout', warn: true, title: 'The real failure mode', text: 'A screen crowded with agreeing indicators produces false confidence, and false confidence produces oversized positions. More indicators do not make you more right; they make you more certain, which is worse.' },
+          { t: 'h', text: 'One from each family' },
+          { t: 'p', text: 'A sound default is a single indicator from each family, so each one is answering a different question:' },
+          { t: 'ol', items: [
+            '**Trend:** the 200-day moving average — is the long-term direction up or down? This is your permission filter.',
+            '**Regime:** ADX — is there a trend at all, or is this a range? This tells you which of the other signals to trust.',
+            '**Momentum:** RSI — is the move stretched, and is there divergence?',
+            '**Volatility:** ATR — how far away does my stop belong, and how many shares can I take?',
+            '**Volume:** OBV or the volume bars — is the money confirming the move?',
+          ]},
+          { t: 'h', text: 'Reading them in order' },
+          { t: 'p', text: 'The order matters, because each answer changes how you read the next:' },
+          { t: 'ol', items: [
+            '**Trend first.** Price above a rising 200-day? Then only look for long setups. This one filter removes most bad trades.',
+            '**Regime second.** ADX above 25 means trade the trend; below 20 means trade the range and ignore crossover signals.',
+            '**Momentum third.** Now look for an entry — a pullback with RSI cooling, not a chase into an overbought spike.',
+            '**Volume fourth.** Confirm real money is behind it before committing.',
+            '**Volatility last.** ATR sets the stop, and the stop sets the position size. This is the step that decides whether being wrong is survivable.',
+          ]},
+          { t: 'example', title: 'A complete read', text: 'Price is above a rising 200-day (trend: up, longs only). ADX is 31 with +DI on top (real trend, use trend tools). Price has pulled back to the 50-day and RSI has cooled from 74 to 52 (momentum: no longer stretched). OBV has kept rising through the pullback (volume: no distribution). ATR is $2.10, so a 2× stop sits $4.20 below entry, which on a $10,000 portfolio at 1% risk allows 23 shares. That is a full decision — entry, exit, and size — with each number coming from a different question.' },
+          { t: 'callout', title: 'The honest summary of this module', text: 'Indicators describe the present clearly; they do not predict the future. Their real value is that they force you to define your risk before you enter, and they give you a consistent language for saying why. A trader with two indicators and a written plan beats one with twelve and a hunch, every time.' },
+        ],
+      },
+      {
         id: 'buy-sell-signals',
         title: 'When to buy, when to sell — signals and their limits',
         minutes: 10,
@@ -412,20 +798,20 @@ export const MODULES = [
     quiz: [
       {
         q: 'A stock keeps making higher highs and higher lows. This is…',
-        options: ['A downtrend', 'An uptrend', 'A squeeze', 'A death cross'],
-        answer: 1,
+        options: ['A downtrend', 'A squeeze', 'An uptrend', 'A death cross'],
+        answer: 2,
         explain: 'Higher highs + higher lows define an uptrend — buyers in control.',
       },
       {
         q: 'The "golden cross" is:',
-        options: ['RSI crossing 50', 'Price touching the upper Bollinger Band', 'The 50-day MA crossing above the 200-day MA', 'Volume doubling in one day'],
-        answer: 2,
+        options: ['The 50-day MA crossing above the 200-day MA', 'Price touching the upper Bollinger Band', 'RSI crossing 50', 'Volume doubling in one day'],
+        answer: 0,
         explain: 'Golden cross = 50-day above 200-day (long-term bullish). The reverse is the death cross.',
       },
       {
         q: 'RSI is at 78. The most accurate reading is:',
-        options: ['Guaranteed crash incoming — sell everything', 'The rally is stretched; chasing here is riskier, but strong stocks can stay overbought', 'The company is overvalued fundamentally', 'Volume must be low'],
-        answer: 1,
+        options: ['Guaranteed crash incoming — sell everything', 'Volume must be low', 'The company is overvalued fundamentally', 'The rally is stretched; chasing here is riskier, but strong stocks can stay overbought'],
+        answer: 3,
         explain: 'Overbought describes recent price behavior, not fundamental value, and it is not an automatic sell signal.',
       },
       {
@@ -435,9 +821,27 @@ export const MODULES = [
         explain: 'Volume is conviction. Thin-volume breakouts frequently fail and reverse.',
       },
       {
-        q: 'Which is a legitimate reason to sell a stock?',
-        options: ['It dropped 3% today', 'A stranger online posted a scary meme', 'The reason you bought it has factually broken down', 'It has gone up and you feel nervous'],
+        q: 'ADX is 14. Which toolkit applies?',
+        options: ['Moving-average crossovers — the trend is strong', 'ADX below 20 means the stock is falling', 'Breakout systems only', 'Oscillators and range tactics — there is no real trend'],
+        answer: 3,
+        explain: 'ADX measures trend STRENGTH, not direction. Below 20 means no trend, so trend-following signals whipsaw and range tools are the ones that pay.',
+      },
+      {
+        q: 'You have RSI, Stochastic, Williams %R and CCI on one chart and all four say overbought. How much confirmation is that?',
+        options: ['Essentially one signal counted several times — they are all momentum oscillators', 'Four independent confirmations — a strong signal', 'Two signals, since CCI is unbounded', 'None — oscillators never agree'],
+        answer: 0,
+        explain: 'They are the same family computed from the same inputs; Williams %R is literally Stochastic %K minus 100. Agreement within a family is redundancy, not confirmation.',
+      },
+      {
+        q: 'A stock has an ATR of $1.50. Why does that matter for your position size?',
+        options: ['It predicts the direction of the next move', 'It tells you the stock is overbought', 'It sets a realistic stop distance, which then determines how many shares keep your risk fixed', 'It measures volume conviction'],
         answer: 2,
+        explain: 'ATR describes a normal day\'s range. A stop inside that range gets hit by noise; a stop at 1.5-3x ATR, fed into the sizing formula, keeps dollar risk constant while share count adapts to the stock.',
+      },
+      {
+        q: 'Which is a legitimate reason to sell a stock?',
+        options: ['The reason you bought it has factually broken down', 'A stranger online posted a scary meme', 'It dropped 3% today', 'It has gone up and you feel nervous'],
+        answer: 0,
         explain: 'Sell on stops, broken theses, extreme overvaluation, rebalancing, or better opportunities — not on raw emotion.',
       },
     ],
@@ -446,7 +850,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'risk',
-    emoji: '🛡️',
+    icon: 'shield',
     level: 'Essential — all levels',
     title: 'Risk Management',
     description: 'The module that keeps you in the game: position sizing, stop losses, diversification, risk/reward math, and the classic traps that destroy beginner portfolios.',
@@ -558,8 +962,8 @@ export const MODULES = [
     quiz: [
       {
         q: 'Your portfolio drops 50%. What gain do you now need to get back to even?',
-        options: ['+50%', '+75%', '+100%', '+200%'],
-        answer: 2,
+        options: ['+50%', '+75%', '+200%', '+100%'],
+        answer: 3,
         explain: 'From $100 to $50 is -50%; from $50 back to $100 requires +100%. Losses are asymmetric — this is why capping them is rule #1.',
       },
       {
@@ -576,14 +980,14 @@ export const MODULES = [
       },
       {
         q: 'A trade risks $5/share to make $15/share (3:1). What win rate do you need to avoid losing money over time?',
-        options: ['75%', 'Above about 25%', '50%', '90%'],
-        answer: 1,
+        options: ['75%', '50%', 'Above about 25%', '90%'],
+        answer: 2,
         explain: 'Break-even win rate = risk ÷ (risk + reward) = 5/20 = 25%. Good ratios let you be wrong often and still profit — that is expectancy.',
       },
       {
         q: 'Your stock falls to your stop-loss. The disciplined action is:',
-        options: ['Move the stop lower and wait', 'Sell as planned and review the trade calmly', 'Double the position to lower your average', 'Delete the app'],
-        answer: 1,
+        options: ['Sell as planned and review the trade calmly', 'Move the stop lower and wait', 'Double the position to lower your average', 'Delete the app'],
+        answer: 0,
         explain: 'The stop is the plan you made when calm. Moving stops away and averaging into broken theses are the two habits that destroy accounts.',
       },
     ],
@@ -592,7 +996,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'psychology',
-    emoji: '🧠',
+    icon: 'brain',
     level: 'Intermediate',
     title: 'Psychology & Strategy',
     description: 'Master the investor in the mirror: the biases that sabotage returns, the main investment strategies, and how to build a written plan you can actually follow.',
@@ -681,8 +1085,8 @@ export const MODULES = [
     quiz: [
       {
         q: 'Loss aversion typically causes investors to…',
-        options: ['Sell losers quickly and let winners run', 'Sell winners too early and hold losers too long', 'Avoid the stock market entirely', 'Buy only index funds'],
-        answer: 1,
+        options: ['Sell losers quickly and let winners run', 'Buy only index funds', 'Avoid the stock market entirely', 'Sell winners too early and hold losers too long'],
+        answer: 3,
         explain: 'Losses hurt ~2× more than gains feel good, so people "lock in" wins fast and refuse to realize losses — the exact opposite of optimal.',
       },
       {
@@ -693,14 +1097,14 @@ export const MODULES = [
       },
       {
         q: 'Dollar-cost averaging means…',
-        options: ['Buying more of a falling stock to lower your average', 'Investing a fixed amount on a fixed schedule regardless of price', 'Only buying stocks under $1', 'Averaging analyst price targets'],
-        answer: 1,
+        options: ['Investing a fixed amount on a fixed schedule regardless of price', 'Buying more of a falling stock to lower your average', 'Only buying stocks under $1', 'Averaging analyst price targets'],
+        answer: 0,
         explain: 'DCA automates buying on a schedule, removing timing decisions — and with them, most emotional errors.',
       },
       {
         q: 'Your stock fell 15%, but earnings, margins, and the moat are all intact. The disciplined response is:',
-        options: ['Sell immediately — down is down', 'Check your thesis sentence; if intact, volatility alone is not a sell reason', 'Move your stop away so it can\'t trigger', 'Post angrily online'],
-        answer: 1,
+        options: ['Sell immediately — down is down', 'Post angrily online', 'Move your stop away so it can\'t trigger', 'Check your thesis sentence; if intact, volatility alone is not a sell reason'],
+        answer: 3,
         explain: 'Price volatility with an intact thesis is the admission fee of investing. Sell on broken theses, stops, extreme valuation, or rebalancing.',
       },
       {
@@ -715,7 +1119,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'analyst',
-    emoji: '💼',
+    icon: 'analyst',
     level: 'Advanced',
     title: 'Think Like a Business Analyst',
     description: 'Go beyond ratios: analyze business models, industries and moats like a professional, estimate what a company is actually worth, and write investment theses.',
@@ -817,33 +1221,33 @@ export const MODULES = [
             '**Timing note.** Trend and entry zone from the Technical module: even a great thesis prefers not to buy a falling knife.',
           ]},
           { t: 'callout', title: 'The Feynman filter', text: 'Explain the thesis out loud to someone smart who knows nothing about stocks. Everywhere you reach for jargon is a place you don\'t understand yet.' },
-          { t: 'p', text: '**Your graduation exercise:** pick any company in the simulator, write the full one-pager, then take the position with proper sizing (Risk module) and manage it by your own kill criteria. Review the thesis every month against new data. Do this ten times in the simulator and you will have built — deliberately — the complete skill loop of a working analyst: research → thesis → position → review → learn.' },
+          { t: 'p', text: '**Your graduation exercise:** pick any company in the simulator, write the full one-pager, then take the position with proper sizing (Risk module) and manage it by your own kill criteria. Review the thesis every month against new data. Do this ten times in the simulator and you will have built — deliberately — the complete skill loop of a working analyst: research, thesis, position, review, learn.' },
         ],
       },
     ],
     quiz: [
       {
         q: 'A software company\'s LTV is $300 and its CAC is $400. Scaling up marketing will…',
-        options: ['Fix the problem automatically', 'Make losses bigger — each new customer destroys value', 'Double the moat', 'Raise the P/E'],
-        answer: 1,
+        options: ['Fix the problem automatically', 'Double the moat', 'Make losses bigger — each new customer destroys value', 'Raise the P/E'],
+        answer: 2,
         explain: 'When acquiring a customer costs more than their lifetime value, growth accelerates the losses. LTV must comfortably exceed CAC first.',
       },
       {
         q: 'Which industry trait predicts chronically LOW profitability under Five Forces?',
-        options: ['High barriers to entry', 'An identical product sold in constant price wars', 'Strong switching costs', 'Millions of small customers'],
-        answer: 1,
+        options: ['High barriers to entry', 'Strong switching costs', 'An identical product sold in constant price wars', 'Millions of small customers'],
+        answer: 2,
         explain: 'Commodity products plus intense rivalry (think airlines) crush margins. The other three options all protect profitability.',
       },
       {
         q: 'The strongest EVIDENCE of a real moat is…',
-        options: ['A famous brand logo', 'Management saying "our moat is wide"', 'Raising prices above inflation for years without losing customers', 'A high stock price'],
-        answer: 2,
+        options: ['Raising prices above inflation for years without losing customers', 'Management saying "our moat is wide"', 'A famous brand logo', 'A high stock price'],
+        answer: 0,
         explain: 'Pricing power that customers accept is a moat demonstrating itself. Claims and logos are hypotheses; retained customers at higher prices are proof.',
       },
       {
         q: 'Your DCF says a stock is worth ~$100. Margin-of-safety discipline means buying at…',
-        options: ['$100 — fair is fair', '$95', 'Around $60–75, so your estimate can be wrong and you still do fine', 'Any price, if the moat is good'],
-        answer: 2,
+        options: ['$100 — fair is fair', '$95', 'Any price, if the moat is good', 'Around $60–75, so your estimate can be wrong and you still do fine'],
+        answer: 3,
         explain: 'Valuations are ranges built on guesses. Buying 25–40% below your estimate absorbs estimation error — the professional habit.',
       },
       {

@@ -1,6 +1,25 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fmtMoney } from '../lib/format.js'
+import { IconRuler, IconScale, IconSprout, IconTag, IconTools, IconWarning, IconCheck } from '../components/icons.jsx'
 
 function Num({ label, value, onChange, step = 'any', suffix }) {
   return (
@@ -27,7 +46,7 @@ function PositionSize() {
   const positionValue = shares * e
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>📐 Position size calculator</h3>
+      <h3 style={{ marginTop: 0 }}><IconRuler size={17} /> Position size calculator</h3>
       <p className="small secondary">
         The 1–2% rule from the <Link to="/learn/risk/position-sizing">Risk module</Link>: risk a
         fixed small % of your portfolio per idea; let the stop distance set the share count.
@@ -63,7 +82,7 @@ function RiskReward() {
   const breakeven = risk > 0 && reward > 0 ? (risk / (risk + reward)) * 100 : null
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>⚖️ Risk / reward calculator</h3>
+      <h3 style={{ marginTop: 0 }}><IconScale size={17} /> Risk / reward calculator</h3>
       <p className="small secondary">
         Skip trades under 2:1 — good ratios let you be wrong often and still profit
         (<Link to="/learn/risk/risk-reward">expectancy lesson</Link>).
@@ -77,7 +96,7 @@ function RiskReward() {
         <div className="notice">
           Risking <strong>{fmtMoney(risk)}</strong> to make <strong>{fmtMoney(reward)}</strong> ={' '}
           <strong>{ratio.toFixed(1)} : 1</strong>{' '}
-          {ratio >= 3 ? '✅ excellent' : ratio >= 2 ? '✔️ acceptable' : '⚠️ below the 2:1 guideline'} ·
+          {ratio >= 3 ? 'excellent' : ratio >= 2 ? 'acceptable' : 'below the 2:1 guideline'} ·
           Break-even win rate: <strong>{breakeven.toFixed(0)}%</strong> — win more often than that
           and this trade profile makes money over time.
         </div>
@@ -100,7 +119,7 @@ function Compound() {
   const growth = fv - contributed
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>🌱 Compound growth calculator</h3>
+      <h3 style={{ marginTop: 0 }}><IconSprout size={17} /> Compound growth calculator</h3>
       <p className="small secondary">
         The engine from <Link to="/learn/foundations/what-is-a-stock">lesson one</Link>: time in
         the market, plus regular contributions, does the heavy lifting.
@@ -144,7 +163,7 @@ function IntrinsicValue() {
   const mos = value && p > 0 ? ((value - p) / value) * 100 : null
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>🏷️ Intrinsic value (simplified DCF)</h3>
+      <h3 style={{ marginTop: 0 }}><IconTag size={17} /> Intrinsic value (simplified DCF)</h3>
       <p className="small secondary">
         Five years of projected free cash flow plus a terminal value, discounted to today —
         the model from the <Link to="/learn/analyst/intrinsic-value">valuation lesson</Link>.
@@ -162,7 +181,7 @@ function IntrinsicValue() {
           Estimated intrinsic value: <strong>{fmtMoney(value)}</strong> per share.{' '}
           {mos != null && (mos > 0
             ? <>At {fmtMoney(p)}, the margin of safety is <strong>{mos.toFixed(0)}%</strong>{' '}
-                {mos >= 25 ? '✅ — inside the 25–40% professional guideline.' : '⚠️ — thinner than the 25% guideline; your assumptions must be right.'}</>
+                {mos >= 25 ? '— inside the 25–40% professional guideline.' : '— thinner than the 25% guideline; your assumptions must be right.'}</>
             : <>At {fmtMoney(p)}, the market price is <strong>above</strong> this estimate — the market
                 is assuming rosier numbers than yours.</>)}
           <div className="small muted" style={{ marginTop: 6 }}>
@@ -179,7 +198,7 @@ function IntrinsicValue() {
 export default function Tools() {
   return (
     <div>
-      <h1>🧮 Analyst tools</h1>
+      <h1><IconTools size={24} /> Analyst tools</h1>
       <p className="subtitle">
         The four calculations every lesson keeps coming back to. Use them on simulator trades
         first, then on any real decision.
