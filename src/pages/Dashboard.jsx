@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { MODULES, moduleProgress } from '../data/lessons.js'
-import { COMPANIES, getQuote, getSeries } from '../lib/market.js'
+import { getCompanies, getQuote, getSeries, isLiveMode } from '../lib/market.js'
 import { portfolioSummary, useStore } from '../lib/store.jsx'
 import { fmtMoney, fmtPct } from '../lib/format.js'
 import { Sparkline } from '../components/charts.jsx'
@@ -21,8 +21,9 @@ export default function Dashboard() {
     }
   }
 
-  const movers = COMPANIES
+  const movers = getCompanies()
     .map((c) => ({ c, q: getQuote(c.ticker) }))
+    .filter((x) => x.q)
     .sort((a, b) => Math.abs(b.q.changePct) - Math.abs(a.q.changePct))
     .slice(0, 4)
 
@@ -100,7 +101,7 @@ export default function Dashboard() {
         })}
       </div>
 
-      <h2>Today's biggest movers (simulated market)</h2>
+      <h2>Today's biggest movers ({isLiveMode() ? 'live market' : 'simulated market'})</h2>
       <div className="grid grid-4">
         {movers.map(({ c, q }) => {
           const closes = getSeries(c.ticker).slice(-30).map((d) => d.close)

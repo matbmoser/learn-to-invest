@@ -7,6 +7,7 @@ import StockDetail from './pages/StockDetail.jsx'
 import Portfolio from './pages/Portfolio.jsx'
 import Tools from './pages/Tools.jsx'
 import Glossary from './pages/Glossary.jsx'
+import Settings from './pages/Settings.jsx'
 
 const links = [
   { to: '/', icon: '🏠', label: 'Dashboard', end: true },
@@ -17,6 +18,7 @@ const links = [
   { to: '/market', icon: '📊', label: 'Market' },
   { to: '/portfolio', icon: '💼', label: 'Portfolio' },
   { to: '/tools', icon: '🧮', label: 'Tools' },
+  { to: '/settings', icon: '⚙️', label: 'Settings' },
 ]
 
 export default function App() {
@@ -51,6 +53,7 @@ export default function App() {
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/glossary" element={<Glossary />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>
     </div>

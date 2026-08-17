@@ -157,7 +157,17 @@ function SignalCard({ closes }) {
 function Fundamentals({ ticker }) {
   const f = getFundamentals(ticker)
   const h = healthScore(f)
-  if (!f) return null
+  if (!f) {
+    return (
+      <div className="notice" style={{ marginTop: 16 }}>
+        📋 Curated fundamentals and the financial health score are a feature of the{' '}
+        <strong>simulated market</strong>, where the numbers are designed as teaching material.
+        For this real stock, look up its financials on your broker or a site like the company's
+        investor-relations page — and practice applying the{' '}
+        <Link to="/learn/fundamental/stock-checklist">analysis checklist</Link> to them.
+      </div>
+    )
+  }
   const rows = [
     ['Market cap', fmtBillions(f.marketCap), 'Price × all shares: the whole company\'s price tag.'],
     ['Revenue (yearly)', fmtBillions(f.revenue), 'Total sales — the top line.'],
@@ -218,15 +228,22 @@ function Fundamentals({ ticker }) {
 
 export default function StockDetail() {
   const { ticker } = useParams()
+  const { dataVersion } = useStore()
   const c = getCompany(ticker)
   const [range, setRange] = useState('6M')
   const [overlays, setOverlays] = useState({ sma20: true, sma50: true })
   const [panels, setPanels] = useState({ rsi: false, macd: false })
 
-  const full = useMemo(() => getSeries(ticker), [ticker])
-  if (!c) return <p>Unknown ticker. <Link to="/market">Back to Market</Link></p>
-
+  const full = useMemo(() => getSeries(ticker), [ticker, dataVersion])
   const q = getQuote(ticker)
+  if (!c || full.length < 2 || !q) {
+    return (
+      <p>
+        No price data for "{ticker}" in the current market mode.{' '}
+        <Link to="/market">Back to Market</Link>
+      </p>
+    )
+  }
   const fullCloses = full.map((d) => d.close)
 
   // indicators over the full series, then slice the visible window

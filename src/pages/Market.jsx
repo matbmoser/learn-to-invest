@@ -1,23 +1,32 @@
-import { useNavigate } from 'react-router-dom'
-import { COMPANIES, getQuote, getSeries } from '../lib/market.js'
+import { Link, useNavigate } from 'react-router-dom'
+import { getCompanies, getQuote, getSeries, isLiveMode } from '../lib/market.js'
+import { useStore } from '../lib/store.jsx'
 import { fmtMoney, fmtPct } from '../lib/format.js'
 import { Sparkline } from '../components/charts.jsx'
 
 export default function Market() {
   const navigate = useNavigate()
-  const rows = COMPANIES.map((c) => ({
-    c,
-    q: getQuote(c.ticker),
-    spark: getSeries(c.ticker).slice(-30).map((d) => d.close),
-  }))
+  useStore() // re-render when the data source (simulated/live) changes
+  const live = isLiveMode()
+  const rows = getCompanies()
+    .map((c) => ({
+      c,
+      q: getQuote(c.ticker),
+      spark: getSeries(c.ticker).slice(-30).map((d) => d.close),
+    }))
+    .filter((r) => r.q)
 
   return (
     <div>
-      <h1>📊 Market</h1>
+      <h1>📊 Market {live && <span className="pill good-bg">live data</span>}</h1>
       <p className="subtitle">
-        A simulated market of 12 fictional companies across sectors. Prices advance every real
-        day, just like a real market — click any stock to analyze it and practice trading with
-        virtual money.
+        {live
+          ? <>Real US stocks with real daily prices (via your API key). Click any stock to analyze
+              it and practice trading with virtual money — switch back to the simulated market any
+              time in <Link to="/settings">Settings</Link>.</>
+          : <>A simulated market of 12 fictional companies across sectors. Prices advance every real
+              day, just like a real market — click any stock to analyze it and practice trading with
+              virtual money. Want real stocks? Add a free API key in <Link to="/settings">Settings</Link>.</>}
       </p>
 
       <div className="card table-wrap">

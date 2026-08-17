@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { getQuote } from './market.js'
+import { disableLiveMode, enableLiveMode, getQuote } from './market.js'
+import { clearLiveCache, fetchLiveData, getCachedLiveData, LIVE_COMPANIES } from './livedata.js'
 
 const STORAGE_KEY = 'learn-to-invest-v1'
 export const STARTING_CASH = 10000
@@ -13,6 +14,8 @@ const defaultState = {
   // completedLessons: { [lessonId]: true }, quizScores: { [moduleId]: pct }
   completedLessons: {},
   quizScores: {},
+  // settings.apiKey never leaves this browser except in requests to the data provider
+  settings: { apiKey: '', liveMode: false },
 }
 
 function load() {
@@ -29,6 +32,11 @@ const StoreContext = createContext(null)
 
 export function StoreProvider({ children }) {
   const [state, setState] = useState(load)
+  // live data lifecycle: off | loading | on | error
+  const [liveStatus, setLiveStatus] = useState({ phase: 'off', message: '' })
+  // bumped whenever the market data source changes, so charts recompute
+  const [dataVersion, setDataVersion] = useState(0)
+  const [reloadCounter, setReloadCounter] = useState(0)
 
   useEffect(() => {
     try {
@@ -38,8 +46,56 @@ export function StoreProvider({ children }) {
     }
   }, [state])
 
+  const { liveMode, apiKey } = state.settings
+  useEffect(() => {
+    let cancelled = false
+    async function activate() {
+      const cached = getCachedLiveData()
+      if (cached && Object.keys(cached).length > 0) {
+        enableLiveMode(LIVE_COMPANIES.filter((c) => cached[c.ticker]), cached)
+        setLiveStatus({ phase: 'on', message: 'Using today\'s cached data.' })
+        setDataVersion((v) => v + 1)
+        return
+      }
+      setLiveStatus({ phase: 'loading', message: 'Fetching real market data…' })
+      try {
+        const { data, failed } = await fetchLiveData(apiKey)
+        if (cancelled) return
+        enableLiveMode(LIVE_COMPANIES.filter((c) => data[c.ticker]), data)
+        setLiveStatus({
+          phase: 'on',
+          message: failed.length ? `Loaded, but some symbols failed: ${failed.join(', ')}` : 'Live data loaded.',
+        })
+      } catch (e) {
+        if (cancelled) return
+        disableLiveMode()
+        setLiveStatus({ phase: 'error', message: e.message })
+      }
+      setDataVersion((v) => v + 1)
+    }
+    if (liveMode && apiKey) {
+      activate()
+    } else {
+      disableLiveMode()
+      setLiveStatus({ phase: 'off', message: '' })
+      setDataVersion((v) => v + 1)
+    }
+    return () => { cancelled = true }
+  }, [liveMode, apiKey, reloadCounter])
+
   const api = useMemo(() => ({
     state,
+    liveStatus,
+    dataVersion,
+
+    updateSettings(patch) {
+      setState((s) => ({ ...s, settings: { ...s.settings, ...patch } }))
+    },
+
+    refreshLiveData() {
+      clearLiveCache()
+      setReloadCounter((c) => c + 1)
+    },
 
     buy(ticker, shares) {
       const q = getQuote(ticker)
@@ -112,7 +168,7 @@ export function StoreProvider({ children }) {
         },
       }))
     },
-  }), [state])
+  }), [state, liveStatus, dataVersion])
 
   return <StoreContext.Provider value={api}>{children}</StoreContext.Provider>
 }

@@ -161,6 +161,29 @@ export const COMPANIES = [
   },
 ]
 
+// ---- Live mode -------------------------------------------------------------
+// When the user supplies an API key in Settings, real companies and real daily
+// candles are injected here and every consumer (charts, quotes, portfolio)
+// works unchanged. Simulated mode remains the default and the fallback.
+let live = null // { companies: [...], series: { [ticker]: candles[] } }
+
+export function enableLiveMode(companies, seriesByTicker) {
+  live = { companies, series: seriesByTicker }
+}
+
+export function disableLiveMode() {
+  live = null
+}
+
+export function isLiveMode() {
+  return !!live
+}
+
+// The active universe — use this instead of COMPANIES in UI code.
+export function getCompanies() {
+  return live ? live.companies : COMPANIES
+}
+
 function isWeekday(d) {
   const day = d.getUTCDay()
   return day !== 0 && day !== 6
@@ -181,6 +204,7 @@ const seriesCache = new Map()
 
 // Full OHLC history for a ticker up to today. Cached per (ticker, day).
 export function getSeries(ticker) {
+  if (live) return live.series[ticker] ?? []
   const now = new Date()
   const todayKey = Math.floor(now.getTime() / MS_PER_DAY)
   const cacheKey = `${ticker}:${todayKey}`
@@ -234,14 +258,17 @@ export function getQuote(ticker) {
 }
 
 export function getCompany(ticker) {
-  return COMPANIES.find((c) => c.ticker === ticker) || null
+  return getCompanies().find((c) => c.ticker === ticker)
+    || COMPANIES.find((c) => c.ticker === ticker)
+    || null
 }
 
 // Fundamentals with price-dependent ratios filled in.
+// Live-mode companies carry no curated fundamentals — returns null for them.
 export function getFundamentals(ticker) {
   const c = getCompany(ticker)
   const q = getQuote(ticker)
-  if (!c || !q) return null
+  if (!c || !c.fundamentals || !q) return null
   const f = { ...c.fundamentals }
   f.peRatio = f.eps > 0 ? q.price / f.eps : null
   f.marketCap = q.price * f.sharesOutB // in billions
