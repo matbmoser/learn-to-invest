@@ -1,3 +1,21 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Mathias Brunkow Moser
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// This file was generated with AI assistance (Claude Code, Anthropic).
+
 import { NavLink, Route, Routes } from 'react-router-dom'
 import Dashboard from './pages/Dashboard.jsx'
 import Learn from './pages/Learn.jsx'
@@ -9,6 +27,7 @@ import Tools from './pages/Tools.jsx'
 import Glossary from './pages/Glossary.jsx'
 import Settings from './pages/Settings.jsx'
 import Mentor from './pages/Mentor.jsx'
+import Footer from './components/Footer.jsx'
 
 const links = [
   { to: '/', icon: '🏠', label: 'Dashboard', end: true },
@@ -58,6 +77,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/mentor" element={<Mentor />} />
         </Routes>
+        <Footer />
       </main>
     </div>
   )

@@ -1,3 +1,23 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright (C) 2026 Mathias Brunkow Moser
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file was generated with AI assistance (Claude Code, Anthropic).
+ */
+
 /* ---------- Design tokens (light default, dark via media query) ---------- */
 :root {
   color-scheme: light;
@@ -320,4 +340,64 @@ label { font-size: 13px; color: var(--text-secondary); display: block; margin-bo
 code {
   background: color-mix(in srgb, var(--text-muted) 12%, transparent);
   border-radius: 5px; padding: 1px 6px; font-size: 0.9em;
+}
+
+/* ---------- Footer & support ---------- */
+.foot {
+  margin-top: 48px;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.foot-in { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.foot-copy { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 16px; }
+.foot-made { white-space: nowrap; }
+.foot-heart { color: var(--critical); }
+.foot-made a, .foot-legal a { color: inherit; text-underline-offset: 0.2em; text-decoration: underline; }
+.foot-made a:hover, .foot-legal a:hover { color: var(--accent); }
+.foot-actions { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+.foot-local { font-size: 12px; color: var(--text-muted); }
+.foot-legal {
+  flex-basis: 100%; width: 100%; text-align: center;
+  font-size: 12px; color: var(--text-muted);
+}
+
+.coffee-qr {
+  display: block; flex: none; width: 104px; padding: 5px;
+  border: 1px solid var(--baseline); border-radius: 8px; background: #fff;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.coffee-qr:hover { border-color: var(--accent); transform: translateY(-1px); text-decoration: none; }
+.coffee-qr img { display: block; width: 100%; height: auto; }
+.coffee-copy { display: flex; align-items: flex-end; flex-direction: column; gap: 8px; }
+.foot-support-buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.coffee-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+  min-height: 38px; padding: 0.55em 0.9em;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--border));
+  border-radius: 8px;
+  background: var(--accent-wash);
+  color: var(--text-primary); font-size: 13px; font-weight: 500;
+  line-height: 1; white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.coffee-btn:hover {
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  border-color: var(--accent); transform: translateY(-1px); text-decoration: none;
+}
+.coffee-btn .mi { color: var(--accent); flex: none; }
+.github-star-btn .mi { color: var(--text-secondary); }
+.coffee-provider {
+  padding-left: 0.5em; border-left: 1px solid var(--baseline);
+  color: var(--accent); font-size: 11px;
+}
+
+@media (max-width: 700px) {
+  .foot-in, .foot-actions { align-items: flex-start; flex-direction: column; }
+  .foot-copy { align-items: flex-start; flex-direction: column; gap: 2px; }
+  .coffee-copy { align-items: flex-start; }
+  .foot-support-buttons { justify-content: flex-start; }
+  .coffee-btn { width: fit-content; min-height: 44px; }
+  .foot-legal { text-align: left; }
 }

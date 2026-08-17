@@ -77,5 +77,39 @@ on Pages with no extra configuration.
 
 ## Disclaimer
 
-This is an educational simulator. All companies, prices, and financial data are fictional and
-generated for practice. Nothing in this app is financial advice.
+This is an educational simulator. In simulated mode all companies, prices, and financial data are
+fictional and generated for practice; in live mode the prices are real but the portfolio is still
+virtual. Nothing in this app is financial advice.
+
+---
+
+## Support the project
+
+If this project helps you learn to invest, you can
+[buy me a coffee with PayPal](https://paypal.me/mathiasbrunkowmoser).
+
+<a href="https://paypal.me/mathiasbrunkowmoser">
+  <img src="docs/screenshots/buymeacoffeepaypal.png" width="180" alt="PayPal QR code for Mathias Brunkow Moser">
+</a>
+
+Made with ♥ by [Mathias Brunkow Moser](https://github.com/matbmoser).
+
+---
+
+## License
+
+GPL-3.0-or-later — see [LICENSE](LICENSE).
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version. It is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.
+
+## AI-generated content
+
+The code and content in this repository were generated with AI assistance
+(Claude Code, Anthropic), directed and edited by the author.
+
+AI makes mistakes. Verify anything that matters — especially anything you would act on with real
+money — against primary sources before relying on it.
