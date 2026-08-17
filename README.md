@@ -23,6 +23,23 @@ Every module ends with a quiz; progress is saved locally.
 - Full fundamentals per stock with beginner explanations and a component-by-component financial health score.
 - Buy/sell with $10,000 of virtual cash; portfolio tracking with P&L, allocation views, transaction history, and automatic **diversification feedback**.
 
+### 💬 AI Mentor — chat with a senior analyst (optional, Claude API)
+Paste a [Claude API key](https://console.anthropic.com) in **Settings** and the **AI Mentor** page
+becomes a chat partner that plays the role of a senior investment analyst. It can explain any
+concept from scratch, walk you through analyzing a company like a professional would, review your
+practice portfolio for risk, and quiz you.
+
+- The mentor sees your live context: your positions and P&L, the current market and prices, and
+  which lessons you've finished — so answers are about *your* situation, not generic theory.
+- From any stock page, **"Ask the analyst about \<TICKER\>"** opens the chat with that company's
+  price, indicators (SMA/RSI/MACD), and fundamentals already in context.
+- Choose Opus 5 (deepest analysis), Sonnet 5, or Haiku 4.5 (fastest/cheapest) in Settings.
+- Replies stream in as they're written; conversations are saved locally.
+- The system prompt keeps it a *teacher*: it explains how analysts think and what evidence shows,
+  and declines to tell you what to buy with real money.
+- Your key is stored only in your browser and sent only to Anthropic. Since the app has no server,
+  use a key with a spending limit and don't save one on a shared computer.
+
 ### 🧮 Analyst tools
 Position size calculator (1–2% rule) · Risk/reward + break-even win rate · Compound growth · Simplified DCF intrinsic value with margin of safety.
 

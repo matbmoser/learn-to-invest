@@ -2,7 +2,81 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LIVE_COMPANIES } from '../lib/livedata.js'
 import { isLiveMode } from '../lib/market.js'
+import { MENTOR_MODELS } from '../lib/mentor.js'
 import { useStore } from '../lib/store.jsx'
+
+function MentorSettings() {
+  const { state, updateSettings } = useStore()
+  const [keyInput, setKeyInput] = useState(state.settings.anthropicKey)
+  const [showKey, setShowKey] = useState(false)
+  const saved = state.settings.anthropicKey && state.settings.anthropicKey === keyInput.trim()
+  const model = state.settings.mentorModel || MENTOR_MODELS[0].id
+
+  return (
+    <div className="card" style={{ marginTop: 16 }}>
+      <div className="row spread">
+        <h3 style={{ margin: 0 }}>💬 AI mentor (Claude API)</h3>
+        {state.settings.anthropicKey
+          ? <span className="pill good-bg">● mentor enabled</span>
+          : <span className="pill neutral">not configured</span>}
+      </div>
+      <p className="small secondary">
+        The <Link to="/mentor">AI Mentor</Link> is a senior-analyst chat partner: it explains any
+        concept, walks you through analyzing a company, reviews your practice portfolio, and quizzes
+        you. It runs on Anthropic's Claude models and needs your own API key.
+      </p>
+
+      <h3>1. Get a Claude API key</h3>
+      <ol className="small secondary" style={{ paddingLeft: 20 }}>
+        <li>Sign up at <a href="https://console.anthropic.com" target="_blank" rel="noreferrer">console.anthropic.com</a> and add a small amount of credit (a few dollars goes a long way for chat).</li>
+        <li>Create an API key — it starts with <code>sk-ant-</code>.</li>
+        <li>Paste it below.</li>
+      </ol>
+
+      <h3>2. Save your key</h3>
+      <div className="row" style={{ alignItems: 'center' }}>
+        <input
+          type={showKey ? 'text' : 'password'}
+          placeholder="sk-ant-..."
+          value={keyInput}
+          onChange={(e) => setKeyInput(e.target.value)}
+          style={{ width: 320, maxWidth: '100%' }}
+          autoComplete="off"
+        />
+        <button onClick={() => setShowKey((s) => !s)}>{showKey ? 'Hide' : 'Show'}</button>
+        <button className="primary" disabled={!keyInput.trim() || saved}
+          onClick={() => updateSettings({ anthropicKey: keyInput.trim() })}>
+          {saved ? 'Saved ✓' : 'Save Claude key'}
+        </button>
+        {state.settings.anthropicKey && (
+          <button className="danger-outline"
+            onClick={() => { updateSettings({ anthropicKey: '' }); setKeyInput('') }}>
+            Remove
+          </button>
+        )}
+      </div>
+      <p className="small muted" style={{ marginTop: 8 }}>
+        🔒 Stored only in this browser (localStorage) and sent only to Anthropic — the app has no
+        server. Because the key lives in the browser, use a key with a spending limit, and don't
+        save one on a shared or public computer.
+      </p>
+
+      <h3>3. Choose a model</h3>
+      <div className="row">
+        <select value={model} onChange={(e) => updateSettings({ mentorModel: e.target.value })}>
+          {MENTOR_MODELS.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+        </select>
+        <span className="small secondary">
+          {MENTOR_MODELS.find((m) => m.id === model)?.note}
+        </span>
+      </div>
+      <p className="small muted" style={{ marginBottom: 0 }}>
+        You pay Anthropic directly for what you use. A typical mentor answer costs a fraction of a
+        cent to a few cents depending on the model.
+      </p>
+    </div>
+  )
+}
 
 export default function Settings() {
   const { state, liveStatus, updateSettings, refreshLiveData } = useStore()
@@ -101,6 +175,8 @@ export default function Settings() {
           </p>
         )}
       </div>
+
+      <MentorSettings />
 
       <div className="notice" style={{ marginTop: 16 }}>
         💡 Your practice portfolio applies to whichever market is active. If you switch between

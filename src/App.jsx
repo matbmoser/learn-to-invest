@@ -8,11 +8,13 @@ import Portfolio from './pages/Portfolio.jsx'
 import Tools from './pages/Tools.jsx'
 import Glossary from './pages/Glossary.jsx'
 import Settings from './pages/Settings.jsx'
+import Mentor from './pages/Mentor.jsx'
 
 const links = [
   { to: '/', icon: '🏠', label: 'Dashboard', end: true },
   { section: 'Learn' },
   { to: '/learn', icon: '🎓', label: 'Academy' },
+  { to: '/mentor', icon: '💬', label: 'AI Mentor' },
   { to: '/glossary', icon: '📖', label: 'Glossary' },
   { section: 'Practice' },
   { to: '/market', icon: '📊', label: 'Market' },
@@ -54,6 +56,7 @@ export default function App() {
           <Route path="/tools" element={<Tools />} />
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/mentor" element={<Mentor />} />
         </Routes>
       </main>
     </div>

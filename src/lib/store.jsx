@@ -14,8 +14,10 @@ const defaultState = {
   // completedLessons: { [lessonId]: true }, quizScores: { [moduleId]: pct }
   completedLessons: {},
   quizScores: {},
-  // settings.apiKey never leaves this browser except in requests to the data provider
-  settings: { apiKey: '', liveMode: false },
+  // API keys never leave this browser except in requests to their own provider
+  settings: { apiKey: '', liveMode: false, anthropicKey: '', mentorModel: 'claude-opus-5' },
+  // AI mentor conversation (most recent chat only)
+  mentorHistory: [],
 }
 
 function load() {
@@ -95,6 +97,11 @@ export function StoreProvider({ children }) {
     refreshLiveData() {
       clearLiveCache()
       setReloadCounter((c) => c + 1)
+    },
+
+    setMentorHistory(history) {
+      // keep the stored transcript bounded so localStorage can't fill up
+      setState((s) => ({ ...s, mentorHistory: history.slice(-40) }))
     },
 
     buy(ticker, shares) {

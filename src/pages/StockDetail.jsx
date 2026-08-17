@@ -288,6 +288,9 @@ export default function StockDetail() {
           <div className={'stat-delta ' + (q.changePct >= 0 ? 'up' : 'down')}>
             {fmtMoney(q.change)} ({fmtPct(q.changePct)}) today
           </div>
+          <Link to={`/mentor?stock=${ticker}`}>
+            <button style={{ marginTop: 8 }}>💬 Ask the analyst about {ticker}</button>
+          </Link>
         </div>
       </div>
 

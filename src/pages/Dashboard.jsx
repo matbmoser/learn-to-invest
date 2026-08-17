@@ -31,8 +31,9 @@ export default function Dashboard() {
     <div>
       <h1>Welcome back 👋</h1>
       <p className="subtitle">
-        Your path: learn a concept in the <Link to="/learn">Academy</Link>, then practice it
-        immediately in the <Link to="/market">simulated market</Link> with virtual money.
+        Your path: learn a concept in the <Link to="/learn">Academy</Link>, practice it
+        immediately in the <Link to="/market">market simulator</Link> with virtual money, and ask
+        the <Link to="/mentor">AI analyst</Link> whenever something doesn't click.
         Nothing here is real-money financial advice — it is a safe training ground.
       </p>
 
