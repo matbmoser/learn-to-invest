@@ -23,6 +23,9 @@ import { annualizedVol, bollinger, ema, macd, maxDrawdown, rsi, sma } from '../l
 import { portfolioSummary, useStore } from '../lib/store.jsx'
 import { fmtBillions, fmtMoney, fmtNum, fmtPct } from '../lib/format.js'
 import { ChartLegend, Meter, TimeSeriesChart } from '../components/charts.jsx'
+import {
+  IconClipboard, IconCompass, IconMentor, IconPulse, IconTrade, IconWarning,
+} from '../components/icons.jsx'
 
 const RANGES = { '3M': 63, '6M': 126, '1Y': 252, 'All': Infinity }
 
@@ -56,7 +59,7 @@ function TradePanel({ ticker }) {
 
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>💵 Practice trade</h3>
+      <h3 style={{ marginTop: 0 }}><IconTrade size={17} /> Practice trade</h3>
       <div className="small secondary" style={{ marginBottom: 10 }}>
         Cash: <strong>{fmtMoney(state.cash)}</strong>
         {held && <> · You own <strong>{held.shares}</strong> shares (avg {fmtMoney(held.costBasis / held.shares)})</>}
@@ -72,7 +75,7 @@ function TradePanel({ ticker }) {
           Order value: <strong>{fmtMoney(cost)}</strong>
           {n > 0 && positionPctAfter > 10 && (
             <div className="down" style={{ marginTop: 4 }}>
-              ⚠️ After buying, this position would be {positionPctAfter.toFixed(0)}% of your
+              <IconWarning size={13} /> After buying, this position would be {positionPctAfter.toFixed(0)}% of your
               portfolio — above the ~10% beginner guideline from the Risk module.
             </div>
           )}
@@ -153,7 +156,7 @@ function SignalCard({ closes }) {
 
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>🧭 Indicator read (educational)</h3>
+      <h3 style={{ marginTop: 0 }}><IconCompass size={17} /> Indicator read (educational)</h3>
       {signals.map((s) => (
         <div key={s.label} style={{ marginBottom: 12 }}>
           <div className="row" style={{ gap: 8 }}>
@@ -178,7 +181,7 @@ function Fundamentals({ ticker }) {
   if (!f) {
     return (
       <div className="notice" style={{ marginTop: 16 }}>
-        📋 Curated fundamentals and the financial health score are a feature of the{' '}
+        <IconClipboard size={15} /> Curated fundamentals and the financial health score are a feature of the{' '}
         <strong>simulated market</strong>, where the numbers are designed as teaching material.
         For this real stock, look up its financials on your broker or a site like the company's
         investor-relations page — and practice applying the{' '}
@@ -203,7 +206,7 @@ function Fundamentals({ ticker }) {
   return (
     <div className="grid grid-2" style={{ marginTop: 16, alignItems: 'start' }}>
       <div className="card table-wrap">
-        <h3 style={{ marginTop: 0 }}>📋 Fundamentals</h3>
+        <h3 style={{ marginTop: 0 }}><IconClipboard size={17} /> Fundamentals</h3>
         <table>
           <tbody>
             {rows.map(([k, v, help]) => (
@@ -219,7 +222,7 @@ function Fundamentals({ ticker }) {
         </table>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>🩺 Financial health score</h3>
+        <h3 style={{ marginTop: 0 }}><IconPulse size={17} /> Financial health score</h3>
         <div className="row" style={{ marginBottom: 6 }}>
           <span className="stat-value">{h.total}/100</span>
         </div>
@@ -307,7 +310,7 @@ export default function StockDetail() {
             {fmtMoney(q.change)} ({fmtPct(q.changePct)}) today
           </div>
           <Link to={`/mentor?stock=${ticker}`}>
-            <button style={{ marginTop: 8 }}>💬 Ask the analyst about {ticker}</button>
+            <button style={{ marginTop: 10 }}><IconMentor size={15} /> Ask the analyst about {ticker}</button>
           </Link>
         </div>
       </div>

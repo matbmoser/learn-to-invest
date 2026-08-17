@@ -18,6 +18,7 @@
 
 import { useState } from 'react'
 import { GLOSSARY } from '../data/glossary.js'
+import { IconGlossary, IconSearch } from '../components/icons.jsx'
 
 export default function Glossary() {
   const [q, setQ] = useState('')
@@ -26,7 +27,7 @@ export default function Glossary() {
   )
   return (
     <div>
-      <h1>📖 Glossary</h1>
+      <h1><IconGlossary size={24} /> Glossary</h1>
       <p className="subtitle">Every term in this app, in plain English. Search as you read.</p>
       <input placeholder="Search terms… (e.g. P/E, stop-loss, moat)" value={q}
         onChange={(e) => setQ(e.target.value)} style={{ width: '100%', maxWidth: 420, marginBottom: 20 }} />

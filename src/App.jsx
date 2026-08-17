@@ -28,27 +28,40 @@ import Glossary from './pages/Glossary.jsx'
 import Settings from './pages/Settings.jsx'
 import Mentor from './pages/Mentor.jsx'
 import Footer from './components/Footer.jsx'
+import { useStore } from './lib/store.jsx'
+import {
+  IconAcademy, IconDashboard, IconGlossary, IconLogo, IconMarket, IconMentor,
+  IconMoon, IconPortfolio, IconSettings, IconSun, IconTools,
+} from './components/icons.jsx'
 
 const links = [
-  { to: '/', icon: '🏠', label: 'Dashboard', end: true },
+  { to: '/', icon: IconDashboard, label: 'Dashboard', end: true },
   { section: 'Learn' },
-  { to: '/learn', icon: '🎓', label: 'Academy' },
-  { to: '/mentor', icon: '💬', label: 'AI Mentor' },
-  { to: '/glossary', icon: '📖', label: 'Glossary' },
+  { to: '/learn', icon: IconAcademy, label: 'Academy' },
+  { to: '/mentor', icon: IconMentor, label: 'AI Mentor' },
+  { to: '/glossary', icon: IconGlossary, label: 'Glossary' },
   { section: 'Practice' },
-  { to: '/market', icon: '📊', label: 'Market' },
-  { to: '/portfolio', icon: '💼', label: 'Portfolio' },
-  { to: '/tools', icon: '🧮', label: 'Tools' },
-  { to: '/settings', icon: '⚙️', label: 'Settings' },
+  { to: '/market', icon: IconMarket, label: 'Market' },
+  { to: '/portfolio', icon: IconPortfolio, label: 'Portfolio' },
+  { to: '/tools', icon: IconTools, label: 'Tools' },
+  { to: '/settings', icon: IconSettings, label: 'Settings' },
 ]
 
 export default function App() {
+  const { state, updateSettings } = useStore()
+  const dark = (state.settings.theme || 'dark') === 'dark'
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-badge">📈</span> Learn to Invest
+          <span className="brand-badge"><IconLogo size={19} /></span>
+          <span>
+            Learn to Invest
+            <span className="brand-sub">Academy &amp; simulator</span>
+          </span>
         </div>
+
         {links.map((l, i) =>
           l.section ? (
             <div className="nav-section" key={i}>{l.section}</div>
@@ -59,11 +72,23 @@ export default function App() {
               end={l.end}
               className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}
             >
-              <span className="nav-icon">{l.icon}</span> {l.label}
+              <l.icon size={17} /> {l.label}
             </NavLink>
           )
         )}
+
+        <div className="sidebar-foot">
+          <button
+            className="theme-toggle"
+            onClick={() => updateSettings({ theme: dark ? 'light' : 'dark' })}
+            aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {dark ? <IconSun size={16} /> : <IconMoon size={16} />}
+            {dark ? 'Light mode' : 'Dark mode'}
+          </button>
+        </div>
       </aside>
+
       <main className="main">
         <Routes>
           <Route path="/" element={<Dashboard />} />

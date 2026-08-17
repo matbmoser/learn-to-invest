@@ -28,7 +28,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'foundations',
-    emoji: '🌱',
+    icon: 'sprout',
     level: 'Beginner',
     title: 'Investing Foundations',
     description: 'Start from absolute zero: what a stock is, how the market works, and how to set yourself up safely before risking a single dollar.',
@@ -154,7 +154,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'fundamental',
-    emoji: '🔍',
+    icon: 'search',
     level: 'Beginner–Intermediate',
     title: 'Fundamental Analysis',
     description: 'Learn to read a company like an analyst: financial statements, the key ratios, and a repeatable checklist to judge whether a business is healthy and fairly priced.',
@@ -304,7 +304,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'technical',
-    emoji: '📈',
+    icon: 'trend',
     level: 'Intermediate',
     title: 'Technical Analysis & Timing',
     description: 'Read price charts, use moving averages, RSI, MACD and Bollinger Bands, and learn what buy/sell signals really mean — including their limits.',
@@ -464,7 +464,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'risk',
-    emoji: '🛡️',
+    icon: 'shield',
     level: 'Essential — all levels',
     title: 'Risk Management',
     description: 'The module that keeps you in the game: position sizing, stop losses, diversification, risk/reward math, and the classic traps that destroy beginner portfolios.',
@@ -610,7 +610,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'psychology',
-    emoji: '🧠',
+    icon: 'brain',
     level: 'Intermediate',
     title: 'Psychology & Strategy',
     description: 'Master the investor in the mirror: the biases that sabotage returns, the main investment strategies, and how to build a written plan you can actually follow.',
@@ -733,7 +733,7 @@ export const MODULES = [
   // ------------------------------------------------------------------
   {
     id: 'analyst',
-    emoji: '💼',
+    icon: 'analyst',
     level: 'Advanced',
     title: 'Think Like a Business Analyst',
     description: 'Go beyond ratios: analyze business models, industries and moats like a professional, estimate what a company is actually worth, and write investment theses.',
@@ -835,7 +835,7 @@ export const MODULES = [
             '**Timing note.** Trend and entry zone from the Technical module: even a great thesis prefers not to buy a falling knife.',
           ]},
           { t: 'callout', title: 'The Feynman filter', text: 'Explain the thesis out loud to someone smart who knows nothing about stocks. Everywhere you reach for jargon is a place you don\'t understand yet.' },
-          { t: 'p', text: '**Your graduation exercise:** pick any company in the simulator, write the full one-pager, then take the position with proper sizing (Risk module) and manage it by your own kill criteria. Review the thesis every month against new data. Do this ten times in the simulator and you will have built — deliberately — the complete skill loop of a working analyst: research → thesis → position → review → learn.' },
+          { t: 'p', text: '**Your graduation exercise:** pick any company in the simulator, write the full one-pager, then take the position with proper sizing (Risk module) and manage it by your own kill criteria. Review the thesis every month against new data. Do this ten times in the simulator and you will have built — deliberately — the complete skill loop of a working analyst: research, thesis, position, review, learn.' },
         ],
       },
     ],

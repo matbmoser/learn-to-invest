@@ -21,6 +21,7 @@ import { getCompanies, getQuote, getSeries, isLiveMode } from '../lib/market.js'
 import { useStore } from '../lib/store.jsx'
 import { fmtMoney, fmtPct } from '../lib/format.js'
 import { Sparkline } from '../components/charts.jsx'
+import { IconMarket } from '../components/icons.jsx'
 
 export default function Market() {
   const navigate = useNavigate()
@@ -36,7 +37,7 @@ export default function Market() {
 
   return (
     <div>
-      <h1>📊 Market {live && <span className="pill good-bg">live data</span>}</h1>
+      <h1><IconMarket size={24} /> Market {live && <span className="pill good-bg">live data</span>}</h1>
       <p className="subtitle">
         {live
           ? <>Real US stocks with real daily prices (via your API key). Click any stock to analyze

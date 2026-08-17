@@ -22,6 +22,7 @@ import Markdown from '../components/markdown.jsx'
 import { askMentor, buildContext, MENTOR_MODELS, suggestedPrompts } from '../lib/mentor.js'
 import { getCompany } from '../lib/market.js'
 import { portfolioSummary, useStore } from '../lib/store.jsx'
+import { IconArrowRight, IconMentor, IconSend, IconStop, IconWarning } from '../components/icons.jsx'
 
 export default function Mentor() {
   const { state, updateSettings, setMentorHistory } = useStore()
@@ -93,14 +94,14 @@ export default function Mentor() {
   if (!apiKey) {
     return (
       <div>
-        <h1>🎓 Ask a senior analyst</h1>
+        <h1><IconMentor size={24} /> Ask a senior analyst</h1>
         <p className="subtitle">
           Chat with an AI mentor that plays the role of a senior investment analyst — it can
           explain any concept, walk you through analyzing a company, review your practice
           portfolio, and quiz you.
         </p>
         <div className="card">
-          <h3 style={{ marginTop: 0 }}>Add a Claude API key to enable the mentor</h3>
+          <h3 style={{ marginTop: 0 }}><IconMentor size={17} /> Add a Claude API key to enable the mentor</h3>
           <p className="small secondary">
             The mentor runs on Anthropic's Claude models. It needs your own API key, which is
             stored only in this browser. Setup takes a couple of minutes:
@@ -110,7 +111,7 @@ export default function Mentor() {
             <li>Create an API key (it starts with <code>sk-ant-</code>).</li>
             <li>Paste it into <Link to="/settings">Settings</Link>.</li>
           </ol>
-          <Link to="/settings"><button className="primary">Go to Settings →</button></Link>
+          <Link to="/settings"><button className="primary">Go to Settings <IconArrowRight size={15} /></button></Link>
         </div>
       </div>
     )
@@ -120,7 +121,7 @@ export default function Mentor() {
     <div>
       <div className="row spread">
         <div>
-          <h1 style={{ marginBottom: 4 }}>🎓 Ask a senior analyst</h1>
+          <h1 style={{ marginBottom: 4 }}><IconMentor size={24} /> Ask a senior analyst</h1>
           <p className="small secondary" style={{ margin: 0 }}>
             {company
               ? <>Focused on <strong>{company.ticker} — {company.name}</strong>. The mentor can see its
@@ -157,27 +158,29 @@ export default function Mentor() {
         )}
 
         {history.map((m, i) => (
-          <div key={i} style={{ marginBottom: 18 }}>
-            <div className="small" style={{ fontWeight: 600, marginBottom: 4, color: m.role === 'user' ? 'var(--text-secondary)' : 'var(--accent)' }}>
-              {m.role === 'user' ? 'You' : 'Analyst'}
+          <div key={i} className="chat-turn">
+            <div className={'chat-who ' + (m.role === 'user' ? 'you' : 'analyst')}>
+              {m.role === 'user' ? 'You' : <><IconMentor size={13} /> Analyst</>}
             </div>
-            <div style={m.role === 'user'
-              ? { background: 'var(--accent-wash)', borderRadius: 10, padding: '10px 14px', whiteSpace: 'pre-wrap' }
-              : undefined}>
-              {m.role === 'user' ? m.content : <Markdown text={m.content} />}
-            </div>
+            {m.role === 'user'
+              ? <div className="chat-bubble">{m.content}</div>
+              : <div className="chat-body"><Markdown text={m.content} /></div>}
           </div>
         ))}
 
         {streaming && (
-          <div style={{ marginBottom: 18 }}>
-            <div className="small" style={{ fontWeight: 600, marginBottom: 4, color: 'var(--accent)' }}>Analyst</div>
-            <Markdown text={streaming} />
+          <div className="chat-turn">
+            <div className="chat-who analyst"><IconMentor size={13} /> Analyst</div>
+            <div className="chat-body"><Markdown text={streaming} /></div>
           </div>
         )}
 
-        {busy && !streaming && <p className="small muted">Thinking…</p>}
-        {error && <p className="small down">⚠️ {error}</p>}
+        {busy && !streaming && (
+          <p className="small muted typing-row">
+            <span className="typing"><i /><i /><i /></span> Thinking…
+          </p>
+        )}
+        {error && <p className="small down"><IconWarning size={14} /> {error}</p>}
         <div ref={endRef} />
       </div>
 
@@ -194,16 +197,17 @@ export default function Mentor() {
           disabled={busy}
         />
         {busy ? (
-          <button type="button" onClick={() => abortRef.current?.abort()}>Stop</button>
+          <button type="button" onClick={() => abortRef.current?.abort()}><IconStop size={14} /> Stop</button>
         ) : (
-          <button type="submit" className="primary" disabled={!input.trim()}>Ask</button>
+          <button type="submit" className="primary" disabled={!input.trim()}><IconSend size={15} /> Ask</button>
         )}
       </form>
 
       <div className="notice" style={{ marginTop: 14 }}>
-        ⚠️ The mentor is a teaching tool, not a financial adviser. It explains how analysts think
+        <IconWarning size={15} />
+        <span>The mentor is a teaching tool, not a financial adviser. It explains how analysts think
         and what the evidence shows — it will not tell you what to buy with real money, and it can
-        be wrong. Verify anything that matters before acting on it.
+        be wrong. Verify anything that matters before acting on it.</span>
       </div>
     </div>
   )

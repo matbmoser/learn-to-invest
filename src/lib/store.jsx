@@ -33,7 +33,11 @@ const defaultState = {
   completedLessons: {},
   quizScores: {},
   // API keys never leave this browser except in requests to their own provider
-  settings: { apiKey: '', liveMode: false, anthropicKey: '', mentorModel: 'claude-opus-5' },
+  settings: {
+    apiKey: '', liveMode: false,
+    anthropicKey: '', mentorModel: 'claude-opus-5',
+    theme: 'dark',
+  },
   // AI mentor conversation (most recent chat only)
   mentorHistory: [],
 }
@@ -65,6 +69,11 @@ export function StoreProvider({ children }) {
       // storage may be unavailable (private mode); the app still works in-memory
     }
   }, [state])
+
+  // Theme is stamped on <html> so CSS tokens (and charts) follow it.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', state.settings.theme || 'dark')
+  }, [state.settings.theme])
 
   const { liveMode, apiKey } = state.settings
   useEffect(() => {
