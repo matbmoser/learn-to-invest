@@ -12,7 +12,8 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Contents
 
-- [Investing Academy](#investing-academy) — 7 modules, 35 lessons, quizzes
+- [Investing Academy](#investing-academy) — 7 modules, 40 lessons, quizzes
+- [Indicator reference](#indicator-reference) — all 17 indicators, drawn and explained
 - [AI Mentor](#ai-mentor) — chat with a senior analyst about your own portfolio
 - [Market simulator](#market-simulator) — TradingView candlestick charts, indicators, fundamentals
 - [Paper trading](#paper-trading) — a virtual $10,000 portfolio with risk feedback
@@ -24,7 +25,7 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Investing Academy
 
-Seven modules and 35 lessons that take you from "what is a stock?" to writing professional
+Seven modules and 40 lessons that take you from "what is a stock?" to writing professional
 investment theses. Each module ends with a quiz, and your progress is saved locally.
 
 | # | Module | What you learn |
@@ -32,7 +33,7 @@ investment theses. Each module ends with a quiz, and your progress is saved loca
 | 1 | **Investing Foundations** | What a stock is, how markets and orders work, and how to set yourself up safely before risking a dollar |
 | 2 | **Financial Concepts** *(basic → advanced)* | Time value of money and compounding, inflation and real returns, interest rates and the economic cycle, bonds and the yield curve, the mathematics of risk (volatility, correlation, beta, CAPM, Sharpe), cost of capital and WACC vs ROIC, and instruments from ETFs to options, leverage and short selling |
 | 3 | **Fundamental Analysis** | The three financial statements, valuation ratios (P/E, P/S), health ratios, moats, and a repeatable analysis checklist |
-| 4 | **Technical Analysis & Timing** | Trends, support/resistance, moving averages, RSI, MACD, Bollinger Bands, volume — and the honest limits of every signal |
+| 4 | **Technical Analysis & Timing** | Trends and support/resistance, moving averages, the four families of indicators, oscillators compared, trend strength with ADX, volatility and volume tools, building a non-redundant indicator set, and honest buy/sell signals |
 | 5 | **Risk Management** | Position sizing (the 1–2% rule), stop losses, diversification, risk/reward math, and the traps that destroy beginners |
 | 6 | **Psychology & Strategy** | Behavioral biases, choosing a strategy, when to sell, and writing your own investment policy statement |
 | 7 | **Think Like a Business Analyst** | Business models, unit economics, Porter's Five Forces, SWOT, moat durability, DCF valuation, and investment theses |
@@ -48,6 +49,38 @@ Module 2 runs from first principles to the machinery professionals actually use,
 like discounting, duration and cost of capital are already familiar when later modules rely on them.
 
 ![Financial concepts lesson](docs/screenshots/lesson-concepts.png)
+
+![Indicator lesson](docs/screenshots/lesson-indicators.png)
+
+---
+
+## Indicator reference
+
+A dedicated page for learning indicators properly: **all 17 are drawn on real price data**, so you
+can see exactly what each looks like before deciding whether it is useful to you.
+
+Every indicator card gives you six things — what it measures, a live chart of it, **what it is
+saying about that chart right now**, what its shape looks like in practice, how to read it, and
+where it misleads you. Change the stock or the range and every reading recomputes.
+
+![Indicator reference](docs/screenshots/indicators.png)
+
+Indicators are grouped into the four families, with overlays drawn on the candles and oscillators
+in their own pane, exactly as they appear on a real chart.
+
+| Family | Question it answers | Indicators |
+|---|---|---|
+| **Trend** | Which way, and how strongly? | SMA · EMA/WMA · MACD · ADX + DI · Parabolic SAR |
+| **Momentum** | How fast, and is speed fading? | RSI · Stochastic · Williams %R · CCI · ROC |
+| **Volatility** | How much movement is normal? | Bollinger Bands · ATR · Keltner · Donchian |
+| **Volume** | How much conviction is behind it? | OBV · MFI · VWAP |
+
+![Oscillator panes](docs/screenshots/indicators-oscillator.png)
+
+The page is deliberately honest about redundancy: Williams %R is mathematically the stochastic
+minus 100, and stacking five momentum oscillators is one opinion counted five times, not
+confirmation. Module 4 of the Academy teaches the theory and how to assemble a set of four
+indicators that actually disagree with each other usefully.
 
 ---
 
@@ -91,8 +124,10 @@ and every pane restyles itself when you switch theme.
 
 ![Indicator panes](docs/screenshots/stock-indicators.png)
 
-Below the chart, a plain-English read of what the indicators currently say, full fundamentals with
-beginner explanations, and a component-by-component financial health score.
+Below the chart, a plain-English read of what the indicators currently say — including whether ADX
+says a trend even exists (and therefore which signals to trust), what a normal day's range means for
+your stop, and whether volume is confirming the move — plus full fundamentals with beginner
+explanations and a component-by-component financial health score.
 
 ![Indicator read and fundamentals](docs/screenshots/stock-analysis.png)
 
@@ -116,7 +151,7 @@ safety.
 
 ![Tools](docs/screenshots/tools.png)
 
-There's also a searchable 77-term glossary in plain English.
+There's also a searchable 95-term glossary in plain English.
 
 ![Glossary](docs/screenshots/glossary.png)
 

@@ -25,7 +25,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { getCompanies, getFundamentals, getQuote, getSeries, healthScore, isLiveMode } from './market.js'
-import { annualizedVol, macd, maxDrawdown, rsi, sma } from './indicators.js'
+import { adx, annualizedVol, atr, macd, maxDrawdown, obv, rsi, sma } from './indicators.js'
 import { MODULES } from '../data/lessons.js'
 import { fmtMoney, fmtPct } from './format.js'
 
@@ -130,6 +130,19 @@ export function buildContext(state, summary, focusTicker) {
       if (r[i] != null) lines.push(`RSI(14) ${r[i].toFixed(0)}`)
       if (m.macdLine[i] != null && m.signal[i] != null) {
         lines.push(`MACD ${m.macdLine[i] > m.signal[i] ? 'above' : 'below'} its signal line`)
+      }
+      const a = adx(series)
+      if (a.adx[i] != null) {
+        lines.push(`ADX ${a.adx[i].toFixed(0)} (${a.adx[i] >= 25 ? 'a real trend is present' : 'no real trend — range conditions'}), ${a.plusDI[i] > a.minusDI[i] ? '+DI' : '-DI'} on top`)
+      }
+      const at = atr(series)
+      if (at[i] != null) lines.push(`ATR ${at[i].toFixed(2)} (about ${((at[i] / q.price) * 100).toFixed(1)}% of price — a normal day's range)`)
+      const o = obv(series)
+      const back = Math.min(20, o.length - 1)
+      if (o[i] != null && o[i - back] != null) {
+        const obvUp = o[i] > o[i - back]
+        const priceUp = closes[i] > closes[i - back]
+        lines.push(`OBV over 20 days is ${obvUp ? 'rising' : 'falling'} while price is ${priceUp ? 'rising' : 'falling'}${obvUp === priceUp ? ' — volume confirms the move' : ' — a volume divergence'}`)
       }
       if (f) {
         lines.push(

@@ -19,7 +19,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCompany, getFundamentals, getQuote, getSeries, healthScore } from '../lib/market.js'
-import { annualizedVol, macd, maxDrawdown, rsi, sma } from '../lib/indicators.js'
+import { adx, annualizedVol, atr, macd, maxDrawdown, obv, rsi, sma } from '../lib/indicators.js'
 import { portfolioSummary, useStore } from '../lib/store.jsx'
 import { fmtBillions, fmtMoney, fmtNum, fmtPct } from '../lib/format.js'
 import { Meter } from '../components/charts.jsx'
@@ -89,7 +89,8 @@ function TradePanel({ ticker }) {
   )
 }
 
-function SignalCard({ closes }) {
+function SignalCard({ candles }) {
+  const closes = candles.map((d) => d.close)
   // Educational read of current indicators — with honest framing
   const s20 = sma(closes, 20)
   const s50 = sma(closes, 50)
@@ -142,9 +143,49 @@ function SignalCard({ closes }) {
     })
   }
 
+  // Regime: which toolkit even applies here?
+  const a = adx(candles)
+  if (a.adx[i] != null) {
+    const v = a.adx[i]
+    const trending = v >= 25
+    signals.push({
+      label: `Trend strength (ADX ${v.toFixed(0)})`,
+      state: !trending ? 'range' : a.plusDI[i] > a.minusDI[i] ? 'bullish' : 'bearish',
+      text: trending
+        ? `A genuine trend is in place, favouring ${a.plusDI[i] > a.minusDI[i] ? 'buyers' : 'sellers'} — trend-following tools apply here.`
+        : 'Below 25, so there is no real trend. Moving-average crossovers will whipsaw; range tactics fit better.',
+    })
+  }
+
+  // Volatility, expressed as the thing you actually use it for.
+  const at = atr(candles)
+  if (at[i] != null) {
+    signals.push({
+      label: `Normal daily range (ATR ${at[i].toFixed(2)})`,
+      state: 'neutral',
+      text: `A typical day moves about ${((at[i] / price) * 100).toFixed(1)}% . A 2× ATR stop would sit roughly ${(at[i] * 2).toFixed(2)} from your entry — closer than that and ordinary noise takes you out.`,
+    })
+  }
+
+  // Is volume confirming the move?
+  const o = obv(candles)
+  const back = Math.min(20, o.length - 1)
+  if (o[i] != null && o[i - back] != null) {
+    const obvUp = o[i] > o[i - back]
+    const priceUp = closes[i] > closes[i - back]
+    signals.push({
+      label: 'Volume confirmation (OBV, 20 days)',
+      state: obvUp === priceUp ? (priceUp ? 'bullish' : 'bearish') : 'divergence',
+      text: obvUp === priceUp
+        ? `Price and on-balance volume are both ${priceUp ? 'rising' : 'falling'} — volume is confirming the move.`
+        : `Price is ${priceUp ? 'rising' : 'falling'} while on-balance volume is ${obvUp ? 'rising' : 'falling'} — a divergence worth treating carefully.`,
+    })
+  }
+
   const pillFor = (state) =>
     state === 'bullish' ? 'good-bg' : state === 'bearish' ? 'crit-bg' :
-    state === 'stretched' || state === 'washed-out' ? 'warn-bg' : 'neutral'
+    state === 'stretched' || state === 'washed-out' || state === 'divergence' || state === 'range'
+      ? 'warn-bg' : 'neutral'
 
   return (
     <div className="card">
@@ -161,7 +202,8 @@ function SignalCard({ closes }) {
       <p className="small muted" style={{ marginBottom: 0 }}>
         Remember from the <Link to="/learn/technical/buy-sell-signals">Academy</Link>: indicators
         describe probabilities, not certainties. Look for several agreeing (confluence) and always
-        pre-define your exit.
+        pre-define your exit. See every indicator drawn and explained in the{' '}
+        <Link to="/indicators">Indicator reference</Link>.
       </p>
     </div>
   )
@@ -307,7 +349,7 @@ export default function StockDetail() {
       </div>
 
       <div className="grid grid-2" style={{ marginTop: 16, alignItems: 'start' }}>
-        <SignalCard closes={fullCloses} />
+        <SignalCard candles={full} />
         <TradePanel ticker={ticker} />
       </div>
 
