@@ -22,7 +22,9 @@ import { IconGlossary, IconSearch } from '../components/icons.jsx'
 
 export default function Glossary() {
   const [q, setQ] = useState('')
-  const filtered = GLOSSARY.filter(
+  const filtered = [...GLOSSARY]
+    .sort((a, b) => a.term.localeCompare(b.term))
+    .filter(
     (g) => g.term.toLowerCase().includes(q.toLowerCase()) || g.def.toLowerCase().includes(q.toLowerCase())
   )
   return (

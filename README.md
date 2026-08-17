@@ -12,9 +12,9 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Contents
 
-- [Investing Academy](#investing-academy) — 6 modules, 28 lessons, quizzes
+- [Investing Academy](#investing-academy) — 7 modules, 35 lessons, quizzes
 - [AI Mentor](#ai-mentor) — chat with a senior analyst about your own portfolio
-- [Market simulator](#market-simulator) — charts, indicators, fundamentals
+- [Market simulator](#market-simulator) — TradingView candlestick charts, indicators, fundamentals
 - [Paper trading](#paper-trading) — a virtual $10,000 portfolio with risk feedback
 - [Analyst tools](#analyst-tools) — position sizing, risk/reward, compounding, DCF
 - [Live market data](#optional-live-market-data) (optional)
@@ -24,17 +24,18 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Investing Academy
 
-Six modules that take you from "what is a stock?" to writing professional investment theses. Each
-module ends with a quiz, and your progress is saved locally.
+Seven modules and 35 lessons that take you from "what is a stock?" to writing professional
+investment theses. Each module ends with a quiz, and your progress is saved locally.
 
 | # | Module | What you learn |
 |---|--------|----------------|
 | 1 | **Investing Foundations** | What a stock is, how markets and orders work, and how to set yourself up safely before risking a dollar |
-| 2 | **Fundamental Analysis** | The three financial statements, valuation ratios (P/E, P/S), health ratios, moats, and a repeatable analysis checklist |
-| 3 | **Technical Analysis & Timing** | Trends, support/resistance, moving averages, RSI, MACD, Bollinger Bands, volume — and the honest limits of every signal |
-| 4 | **Risk Management** | Position sizing (the 1–2% rule), stop losses, diversification, risk/reward math, and the traps that destroy beginners |
-| 5 | **Psychology & Strategy** | Behavioral biases, choosing a strategy, when to sell, and writing your own investment policy statement |
-| 6 | **Think Like a Business Analyst** | Business models, unit economics, Porter's Five Forces, SWOT, moat durability, DCF valuation, and investment theses |
+| 2 | **Financial Concepts** *(basic → advanced)* | Time value of money and compounding, inflation and real returns, interest rates and the economic cycle, bonds and the yield curve, the mathematics of risk (volatility, correlation, beta, CAPM, Sharpe), cost of capital and WACC vs ROIC, and instruments from ETFs to options, leverage and short selling |
+| 3 | **Fundamental Analysis** | The three financial statements, valuation ratios (P/E, P/S), health ratios, moats, and a repeatable analysis checklist |
+| 4 | **Technical Analysis & Timing** | Trends, support/resistance, moving averages, RSI, MACD, Bollinger Bands, volume — and the honest limits of every signal |
+| 5 | **Risk Management** | Position sizing (the 1–2% rule), stop losses, diversification, risk/reward math, and the traps that destroy beginners |
+| 6 | **Psychology & Strategy** | Behavioral biases, choosing a strategy, when to sell, and writing your own investment policy statement |
+| 7 | **Think Like a Business Analyst** | Business models, unit economics, Porter's Five Forces, SWOT, moat durability, DCF valuation, and investment theses |
 
 ![Academy](docs/screenshots/academy.png)
 
@@ -42,6 +43,11 @@ Lessons are written for a beginner — plain language, worked examples, and call
 that actually cost people money.
 
 ![Lesson](docs/screenshots/lesson.png)
+
+Module 2 runs from first principles to the machinery professionals actually use, so that concepts
+like discounting, duration and cost of capital are already familiar when later modules rely on them.
+
+![Financial concepts lesson](docs/screenshots/lesson-concepts.png)
 
 ---
 
@@ -69,13 +75,24 @@ Requires your own [Claude API key](https://console.anthropic.com) — see
 ## Market simulator
 
 Twelve fictional companies across sectors, with deterministic price histories that advance every
-real day. Each stock page has an interactive chart with SMA/EMA/Bollinger overlays and RSI/MACD
-panels, a plain-English read of what the indicators currently say, full fundamentals with
-beginner explanations, and a component-by-component financial health score.
+real day.
 
 ![Market](docs/screenshots/market.png)
 
+Charts are built on **[TradingView Lightweight Charts](https://github.com/tradingview/lightweight-charts)**
+— the same charting engine used by professional finance sites. You get real candlesticks with a
+volume pane, scroll-to-zoom and drag-to-pan, a crosshair with an OHLC readout, moving-average and
+Bollinger overlays, and a candle/line toggle across five time ranges.
+
 ![Stock detail](docs/screenshots/stock-detail.png)
+
+RSI and MACD open as separate panes whose crosshair and time axis stay locked to the price chart,
+and every pane restyles itself when you switch theme.
+
+![Indicator panes](docs/screenshots/stock-indicators.png)
+
+Below the chart, a plain-English read of what the indicators currently say, full fundamentals with
+beginner explanations, and a component-by-component financial health score.
 
 ![Indicator read and fundamentals](docs/screenshots/stock-analysis.png)
 
@@ -99,7 +116,7 @@ safety.
 
 ![Tools](docs/screenshots/tools.png)
 
-There's also a searchable 50-term glossary in plain English.
+There's also a searchable 77-term glossary in plain English.
 
 ![Glossary](docs/screenshots/glossary.png)
 
@@ -147,8 +164,11 @@ npm run build    # production build to dist/
 npm run preview  # serve the production build
 ```
 
-Built with React + Vite. All state — course progress, portfolio, settings, and chat history —
-lives in your browser's localStorage.
+Built with React + Vite, charting by
+[TradingView Lightweight Charts](https://github.com/tradingview/lightweight-charts) (Apache-2.0),
+and the AI mentor on the official [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript).
+All state — course progress, portfolio, settings, and chat history — lives in your browser's
+localStorage.
 
 ## Deploying to GitHub Pages
 

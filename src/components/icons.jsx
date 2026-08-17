@@ -76,6 +76,9 @@ export const IconShield = (p) => (
 export const IconBrain = (p) => (
   <Svg {...p}><path d="M9.5 3A2.5 2.5 0 0 0 7 5.5 2.5 2.5 0 0 0 4.5 8c0 .8.4 1.5 1 2A2.5 2.5 0 0 0 4 12.5c0 1 .6 1.9 1.5 2.3-.3.4-.5 1-.5 1.5A2.7 2.7 0 0 0 7.7 19c.4 1.2 1.5 2 2.8 2 .9 0 1.5-.5 1.5-1.4V4.9C12 3.8 11 3 9.5 3Z" /><path d="M14.5 3A2.5 2.5 0 0 1 17 5.5 2.5 2.5 0 0 1 19.5 8c0 .8-.4 1.5-1 2a2.5 2.5 0 0 1 1.5 2.5c0 1-.6 1.9-1.5 2.3.3.4.5 1 .5 1.5a2.7 2.7 0 0 1-2.7 2.7c-.4 1.2-1.5 2-2.8 2-.9 0-1.5-.5-1.5-1.4V4.9C12 3.8 13 3 14.5 3Z" /></Svg>
 )
+export const IconFinance = (p) => (
+  <Svg {...p}><circle cx="12" cy="12" r="9" /><path d="M15 8.5h-3.9a1.85 1.85 0 0 0 0 3.7h1.8a1.85 1.85 0 0 1 0 3.7H9" /><path d="M12 7v1.5M12 15.9v1.6" /></Svg>
+)
 export const IconAnalyst = (p) => (
   <Svg {...p}><path d="M3 21h18" /><path d="M5 21V7l7-4 7 4v14" /><path d="M9.5 11h1M13.5 11h1M9.5 15h1M13.5 15h1" /></Svg>
 )
@@ -174,6 +177,7 @@ export const ICONS = {
   tools: IconTools, settings: IconSettings,
   sprout: IconSprout, search: IconSearch, trend: IconTrend,
   shield: IconShield, brain: IconBrain, analyst: IconAnalyst,
+  finance: IconFinance,
 }
 
 export function Icon({ name, ...rest }) {

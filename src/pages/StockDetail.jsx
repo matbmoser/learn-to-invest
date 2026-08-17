@@ -19,22 +19,14 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCompany, getFundamentals, getQuote, getSeries, healthScore } from '../lib/market.js'
-import { annualizedVol, bollinger, ema, macd, maxDrawdown, rsi, sma } from '../lib/indicators.js'
+import { annualizedVol, macd, maxDrawdown, rsi, sma } from '../lib/indicators.js'
 import { portfolioSummary, useStore } from '../lib/store.jsx'
 import { fmtBillions, fmtMoney, fmtNum, fmtPct } from '../lib/format.js'
-import { ChartLegend, Meter, TimeSeriesChart } from '../components/charts.jsx'
+import { Meter } from '../components/charts.jsx'
+import StockChart from '../components/StockChart.jsx'
 import {
   IconClipboard, IconCompass, IconMentor, IconPulse, IconTrade, IconWarning,
 } from '../components/icons.jsx'
-
-const RANGES = { '3M': 63, '6M': 126, '1Y': 252, 'All': Infinity }
-
-const OVERLAYS = [
-  { key: 'sma20', label: 'SMA 20', color: 'var(--series-2)' },
-  { key: 'sma50', label: 'SMA 50', color: 'var(--series-7)' },
-  { key: 'ema12', label: 'EMA 12', color: 'var(--series-5)' },
-  { key: 'boll', label: 'Bollinger', color: 'var(--series-1)' },
-]
 
 function TradePanel({ ticker }) {
   const { state, buy, sell } = useStore()
@@ -251,9 +243,6 @@ export default function StockDetail() {
   const { ticker } = useParams()
   const { dataVersion } = useStore()
   const c = getCompany(ticker)
-  const [range, setRange] = useState('6M')
-  const [overlays, setOverlays] = useState({ sma20: true, sma50: true })
-  const [panels, setPanels] = useState({ rsi: false, macd: false })
 
   const full = useMemo(() => getSeries(ticker), [ticker, dataVersion])
   const q = getQuote(ticker)
@@ -266,28 +255,6 @@ export default function StockDetail() {
     )
   }
   const fullCloses = full.map((d) => d.close)
-
-  // indicators over the full series, then slice the visible window
-  const ind = {
-    sma20: sma(fullCloses, 20),
-    sma50: sma(fullCloses, 50),
-    ema12: ema(fullCloses, 12),
-    boll: bollinger(fullCloses, 20, 2),
-    rsi: rsi(fullCloses, 14),
-    macd: macd(fullCloses),
-  }
-  const n = RANGES[range] === Infinity ? full.length : Math.min(RANGES[range], full.length)
-  const cut = (arr) => arr.slice(full.length - n)
-  const dates = cut(full.map((d) => d.date))
-  const closes = cut(fullCloses)
-
-  const series = [{ name: 'Price', color: 'var(--series-1)', values: closes }]
-  if (overlays.sma20) series.push({ name: 'SMA 20', color: 'var(--series-2)', values: cut(ind.sma20) })
-  if (overlays.sma50) series.push({ name: 'SMA 50', color: 'var(--series-7)', values: cut(ind.sma50) })
-  if (overlays.ema12) series.push({ name: 'EMA 12', color: 'var(--series-5)', values: cut(ind.ema12), dash: true })
-  const band = overlays.boll
-    ? { upper: cut(ind.boll.upper), lower: cut(ind.boll.lower), color: 'var(--series-1)' }
-    : null
 
   const vol = annualizedVol(fullCloses.slice(-252))
   const dd = maxDrawdown(fullCloses.slice(-252))
@@ -335,57 +302,8 @@ export default function StockDetail() {
       </div>
 
       <div className="card">
-        <div className="row spread">
-          <h3 style={{ margin: 0 }}>Price chart</h3>
-          <div className="range-tabs">
-            {Object.keys(RANGES).map((r) => (
-              <button key={r} className={r === range ? 'active' : ''} onClick={() => setRange(r)}>{r}</button>
-            ))}
-          </div>
-        </div>
-        <div className="toggle-row">
-          {OVERLAYS.map((o) => (
-            <button key={o.key}
-              className={'toggle-chip' + (overlays[o.key] ? ' on' : '')}
-              onClick={() => setOverlays((s) => ({ ...s, [o.key]: !s[o.key] }))}>
-              {o.label}
-            </button>
-          ))}
-          <button className={'toggle-chip' + (panels.rsi ? ' on' : '')}
-            onClick={() => setPanels((s) => ({ ...s, rsi: !s.rsi }))}>RSI panel</button>
-          <button className={'toggle-chip' + (panels.macd ? ' on' : '')}
-            onClick={() => setPanels((s) => ({ ...s, macd: !s.macd }))}>MACD panel</button>
-        </div>
-        <TimeSeriesChart dates={dates} series={series} band={band}
-          height={320} formatValue={(v) => `$${v.toFixed(2)}`} areaFill={series.length === 1} />
-        <ChartLegend items={series.map((s) => ({ name: s.name, color: s.color }))} />
-
-        {panels.rsi && (
-          <>
-            <h3>RSI (14) <span className="small muted">— above 70 overbought, below 30 oversold</span></h3>
-            <TimeSeriesChart dates={dates}
-              series={[{ name: 'RSI', color: 'var(--series-7)', values: cut(ind.rsi) }]}
-              height={140} yDomain={[0, 100]} formatValue={(v) => v.toFixed(0)}
-              refLines={[{ value: 70, label: '70' }, { value: 30, label: '30' }]} />
-          </>
-        )}
-        {panels.macd && (
-          <>
-            <h3>MACD (12, 26, 9) <span className="small muted">— crossovers signal momentum shifts</span></h3>
-            <TimeSeriesChart dates={dates}
-              series={[
-                { name: 'MACD', color: 'var(--series-1)', values: cut(ind.macd.macdLine) },
-                { name: 'Signal', color: 'var(--series-2)', values: cut(ind.macd.signal) },
-              ]}
-              bars={{ name: 'Histogram', values: cut(ind.macd.histogram), posColor: 'var(--series-3)', negColor: 'var(--series-8)' }}
-              height={160} formatValue={(v) => v.toFixed(2)} />
-            <ChartLegend items={[
-              { name: 'MACD', color: 'var(--series-1)' },
-              { name: 'Signal', color: 'var(--series-2)' },
-              { name: 'Histogram', color: 'var(--series-3)' },
-            ]} />
-          </>
-        )}
+        <h3 style={{ marginTop: 0 }}>Price chart</h3>
+        <StockChart series={full} ticker={ticker} />
       </div>
 
       <div className="grid grid-2" style={{ marginTop: 16, alignItems: 'start' }}>
