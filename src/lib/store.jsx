@@ -19,6 +19,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { disableLiveMode, enableLiveMode, getQuote } from './market.js'
 import { clearLiveCache, fetchLiveData, getCachedLiveData, LIVE_COMPANIES } from './livedata.js'
+import { SEED_INSTRUMENTS } from './realportfolio.js'
 
 const STORAGE_KEY = 'learn-to-invest-v1'
 export const STARTING_CASH = 10000
@@ -40,13 +41,20 @@ const defaultState = {
   },
   // AI mentor conversation (most recent chat only)
   mentorHistory: [],
+  // The user's REAL portfolio tracker (separate from the simulator):
+  // instruments they actually own, its own analyst chat, and cached
+  // analyst reads keyed by instrument id.
+  realPortfolio: { instruments: null, chat: [], reads: {} },
 }
 
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return defaultState
-    return { ...defaultState, ...JSON.parse(raw) }
+    const st = raw ? { ...defaultState, ...JSON.parse(raw) } : { ...defaultState }
+    if (!st.realPortfolio?.instruments) {
+      st.realPortfolio = { chat: [], reads: {}, ...st.realPortfolio, instruments: SEED_INSTRUMENTS }
+    }
+    return st
   } catch {
     return defaultState
   }
@@ -124,6 +132,58 @@ export function StoreProvider({ children }) {
     refreshLiveData() {
       clearLiveCache()
       setReloadCounter((c) => c + 1)
+    },
+
+    addInstrument(inst) {
+      setState((s) => ({
+        ...s,
+        realPortfolio: {
+          ...s.realPortfolio,
+          instruments: [...s.realPortfolio.instruments, inst],
+        },
+      }))
+    },
+
+    updateInstrument(id, patch) {
+      setState((s) => ({
+        ...s,
+        realPortfolio: {
+          ...s.realPortfolio,
+          instruments: s.realPortfolio.instruments.map((i) => (i.id === id ? { ...i, ...patch } : i)),
+        },
+      }))
+    },
+
+    removeInstrument(id) {
+      setState((s) => {
+        const reads = { ...s.realPortfolio.reads }
+        delete reads[id]
+        return {
+          ...s,
+          realPortfolio: {
+            ...s.realPortfolio,
+            reads,
+            instruments: s.realPortfolio.instruments.filter((i) => i.id !== id),
+          },
+        }
+      })
+    },
+
+    setRealChat(history) {
+      setState((s) => ({
+        ...s,
+        realPortfolio: { ...s.realPortfolio, chat: history.slice(-30) },
+      }))
+    },
+
+    setRead(id, read) {
+      setState((s) => ({
+        ...s,
+        realPortfolio: {
+          ...s.realPortfolio,
+          reads: { ...s.realPortfolio.reads, [id]: read },
+        },
+      }))
     },
 
     setMentorHistory(history) {

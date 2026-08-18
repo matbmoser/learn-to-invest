@@ -653,3 +653,40 @@ code {
   .ind-grid { grid-template-columns: 1fr; gap: 14px; }
   .ind-controls { position: static; }
 }
+
+/* ------------------------------------------- my investments page -- */
+.invest-layout { display: flex; gap: 20px; align-items: flex-start; }
+.invest-main { flex: 1; min-width: 0; }
+.chat-dock {
+  width: 320px; flex: 0 0 320px;
+  position: sticky; top: 20px; margin-top: 0;
+  display: flex; flex-direction: column;
+  max-height: calc(100vh - 40px);
+}
+.chat-dock .dock-scroll { overflow-y: auto; flex: 1; min-height: 120px; padding-right: 4px; }
+.chat-dock .chat-turn { margin-bottom: 14px; }
+.dock-opener {
+  position: sticky; top: 20px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  writing-mode: initial;
+}
+.invest-form-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;
+}
+.invest-form-grid label {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 12px; color: var(--text-muted);
+}
+.analyst-read {
+  margin-top: 14px; padding: 12px 14px;
+  background: var(--raised); border: 1px solid var(--baseline);
+  border-radius: 10px;
+}
+@media (max-width: 1150px) {
+  .invest-layout { flex-direction: column; }
+  .chat-dock { width: 100%; flex: none; position: static; max-height: 420px; order: 2; }
+  .dock-opener { position: static; }
+}
+@media (max-width: 760px) {
+  .invest-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

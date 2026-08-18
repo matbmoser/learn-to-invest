@@ -16,6 +16,7 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 - [Indicator reference](#indicator-reference) — all 17 indicators, drawn and explained
 - [Pattern lab](#pattern-lab) — back-test 22 signals against their own baseline
 - [AI Mentor](#ai-mentor) — chat with a senior analyst about your own portfolio
+- [My investments](#my-investments) — track your real holdings, with live charts and analyst reads
 - [Market simulator](#market-simulator) — TradingView candlestick charts, indicators, fundamentals
 - [Paper trading](#paper-trading) — a virtual $10,000 portfolio with risk feedback
 - [Analyst tools](#analyst-tools) — position sizing, risk/reward, compounding, DCF
@@ -165,6 +166,35 @@ evidence supports, and declines to tell you what to buy with real money.
 
 Requires your own [Claude API key](https://console.anthropic.com) — see
 [Settings](#settings--api-keys).
+
+---
+
+## My investments
+
+A dashboard for the portfolio you actually own — separate from the practice simulator, and
+stored only in your browser like everything else.
+
+![My investments](docs/screenshots/invest.png)
+
+- **Your real instruments**, pre-seeded with an example mix of German stocks, a world ETF, US
+  stocks and a private company — edit them, remove them, or **add any instrument** (stock, ETF, or
+  private holding without a ticker).
+- **Configure your position**: shares held, average cost, and a manual price for anything without
+  a live feed (private companies, or exchanges outside your data plan).
+- **Choose what to monitor** — monitored instruments get a live chart and analyst reads; the rest
+  just sit in the table.
+- **Live charts with selectable styles** — candles, line, area, or baseline, plus ranges, an
+  SMA-50 overlay and a volume pane — via your Twelve Data key (US symbols work on the free plan;
+  XETRA/LSE listings need a paid plan, and fall back to manual prices with a clear notice).
+- **Analyst reads via the Claude API** — one click per holding produces a structured educational
+  read: what the asset is, how it has been behaving, what an analyst would watch next, the risks
+  of *your* position (including overlaps like owning Apple twice through a world ETF), and which
+  Academy module to study next. Teaching, never buy/sell instructions.
+- **A docked analyst chat on the left** that sees your real holdings and prices, so you can ask
+  "am I too concentrated?" without leaving the dashboard.
+- Totals are shown in EUR, with USD positions converted at the live EUR/USD rate.
+
+![My investments charts](docs/screenshots/invest-charts.png)
 
 ---
 
