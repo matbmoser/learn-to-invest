@@ -111,7 +111,7 @@ function CompareChart({ tickers, focus, range }) {
 }
 
 export default function Research() {
-  const { state, dataVersion, setResearch, setResearchNote, setResearchChat } = useStore()
+  const { state, dataVersion, setResearch, setResearchNote, setResearchChat, refreshLiveData, liveStatus } = useStore()
   const companies = getCompanies()
   const research = state.research || { ticker: '', pins: [], notes: {} }
 
@@ -220,6 +220,11 @@ export default function Research() {
           <button onClick={() => pin(ticker)} disabled={research.pins?.includes(ticker)}>
             <IconTag size={13} /> Pin to chart
           </button>
+          {state.settings.liveMode && (
+            <button onClick={refreshLiveData} disabled={liveStatus.phase === 'loading'}>
+              {liveStatus.phase === 'loading' ? 'Updating…' : 'Update data'}
+            </button>
+          )}
           <button className="primary" onClick={analyseSituation}>
             <IconBulb size={14} /> Analyse my situation
           </button>

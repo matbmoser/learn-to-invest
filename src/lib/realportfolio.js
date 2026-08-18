@@ -63,17 +63,23 @@ function parseSeries(body) {
     .reverse()
 }
 
+let cacheMemo = { key: '', value: null }
+
 export function getCachedRealData() {
   try {
     const raw = localStorage.getItem(CACHE_KEY)
     if (!raw) return null
+    const key = raw.length + raw.slice(0, 40)
+    if (cacheMemo.key === key) return cacheMemo.value
     const { stamp, data, failed, fx } = JSON.parse(raw)
     if (stamp !== todayStamp()) return null
     const out = {}
     for (const [sym, rows] of Object.entries(data)) {
       out[sym] = rows.map((r) => ({ ...r, date: new Date(r.date) }))
     }
-    return { data: out, failed: failed || {}, fx: fx || null }
+    const value = { data: out, failed: failed || {}, fx: fx || null }
+    cacheMemo = { key, value }
+    return value
   } catch {
     return null
   }
@@ -115,6 +121,7 @@ export async function fetchRealData(apiKey, instruments) {
   }
   const fxSeries = parseSeries(bySym['EUR/USD'])
   const fx = fxSeries?.length ? fxSeries[fxSeries.length - 1].close : null
+  if (fxSeries?.length) data['EUR/USD'] = fxSeries
 
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({
@@ -126,6 +133,8 @@ export async function fetchRealData(apiKey, instruments) {
       ])),
     }))
   } catch { /* cache is an optimization */ }
+  cacheMemo = { key: '', value: null }
+  try { window.dispatchEvent(new Event('lti-real-updated')) } catch { /* SSR/tests */ }
 
   return { data, failed, fx }
 }
@@ -187,12 +196,18 @@ export function realSummary(instruments, liveData) {
 
 // Compact context block so the analyst chat and the per-position reads see
 // the user's REAL holdings (marked clearly as real, not the simulator).
-export function buildRealContext(instruments, liveData, summary) {
+export function buildRealContext(instruments, liveData, summary, pnl) {
   const lines = []
   lines.push('# THE USER\'S REAL PORTFOLIO (actual money, tracked in the "My investments" dashboard)')
   lines.push('This is separate from the practice simulator. Be a teacher: explain reasoning and risks; never give a direct instruction to buy or sell with real money.')
   if (summary.valueEUR > 0) {
     lines.push(`Approximate total of priced positions: €${summary.valueEUR.toFixed(0)}${summary.unpriced ? ` (+${summary.unpriced} position(s) without a price)` : ''}. EUR/USD ${summary.fx ? summary.fx.toFixed(4) : 'unknown'}.`)
+  }
+  if (pnl) {
+    const bits = PNL_WINDOWS
+      .map((w) => (pnl[w.key] ? `${w.label} ${pnl[w.key].abs >= 0 ? '+' : ''}${pnl[w.key].abs.toFixed(0)} EUR (${pnl[w.key].pct != null ? (pnl[w.key].pct >= 0 ? '+' : '') + pnl[w.key].pct.toFixed(2) + '%' : 'n/a'})` : null))
+      .filter(Boolean)
+    if (bits.length) lines.push('Portfolio P&L by period: ' + bits.join(' · '))
   }
   for (const r of realSummary(instruments, liveData).rows) {
     const p = r.priceInfo
@@ -219,4 +234,78 @@ export function buildRealContext(instruments, liveData, summary) {
     lines.push(`- ${inst.symbol} recent: 1M ${perf(21)}, 3M ${perf(63)}, 1Y ${perf(252)}; 52-week range ${Math.min(...c.slice(-252)).toFixed(2)}–${Math.max(...c.slice(-252)).toFixed(2)} ${inst.currency}`)
   }
   return lines.join('\n')
+}
+
+// ------------------------------------------------------------------
+// Wealth analytics: the EUR value of the CURRENT holdings evaluated over
+// history. Assumes today's share counts across the window (purchase dates
+// are unknown), converts USD positions through the EUR/USD series day by
+// day, and adds manual-priced positions (e.g. private companies) as a
+// constant contribution.
+
+export function portfolioHistory(instruments, liveData) {
+  const owned = instruments.filter((i) => i.shares > 0)
+  if (!owned.length || !liveData?.data) return []
+  const fxRows = liveData.data['EUR/USD'] || []
+  const fxMap = new Map(fxRows.map((r) => [r.date.toISOString().slice(0, 10), r.close]))
+  const latestFx = liveData.fx || (fxRows.length ? fxRows[fxRows.length - 1].close : null)
+
+  const live = []
+  let manualEUR = 0
+  const dates = new Set()
+  for (const inst of owned) {
+    const sym = requestSymbol(inst)
+    const rows = sym && liveData.data[sym]
+    if (rows?.length) {
+      const map = new Map(rows.map((r) => [r.date.toISOString().slice(0, 10), r.close]))
+      live.push({ inst, map, first: rows[0].close })
+      for (const k of map.keys()) dates.add(k)
+    } else if (inst.manualPrice > 0) {
+      const native = inst.manualPrice * inst.shares
+      manualEUR += inst.currency === 'USD' ? (latestFx ? native / latestFx : 0) : native
+    }
+  }
+  if (!live.length) return []
+
+  const sorted = [...dates].sort().slice(-400)
+  const lastClose = new Map()
+  let lastFx = fxRows.length ? fxRows[0].close : latestFx
+  const out = []
+  for (const day of sorted) {
+    if (fxMap.has(day)) lastFx = fxMap.get(day)
+    let total = manualEUR
+    let complete = true
+    for (const { inst, map, first } of live) {
+      if (map.has(day)) lastClose.set(inst.id, map.get(day))
+      const close = lastClose.get(inst.id) ?? first
+      const native = close * inst.shares
+      if (inst.currency === 'EUR') total += native
+      else if (lastFx) total += native / lastFx
+      else complete = false
+    }
+    if (complete) out.push({ date: new Date(day + 'T00:00:00Z'), value: total })
+  }
+  return out
+}
+
+// P&L over standard windows of TRADING days, from the history above.
+export const PNL_WINDOWS = [
+  { key: 'day', label: 'Today', n: 1 },
+  { key: 'week', label: '1 week', n: 5 },
+  { key: 'month', label: '1 month', n: 21 },
+  { key: 'quarter', label: '3 months', n: 63 },
+  { key: 'year', label: '1 year', n: 252 },
+]
+
+export function periodPnL(history) {
+  if (!history || history.length < 2) return null
+  const last = history[history.length - 1].value
+  const out = {}
+  for (const w of PNL_WINDOWS) {
+    const i = history.length - 1 - w.n
+    if (i < 0) { out[w.key] = null; continue }
+    const base = history[i].value
+    out[w.key] = { abs: last - base, pct: base > 0 ? ((last - base) / base) * 100 : null }
+  }
+  return out
 }

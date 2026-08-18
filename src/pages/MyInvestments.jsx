@@ -26,10 +26,11 @@ import { Link } from 'react-router-dom'
 import Markdown from '../components/markdown.jsx'
 import LiveChart from '../components/LiveChart.jsx'
 import AnalystDock from '../components/AnalystDock.jsx'
+import { AllocationBars, PnLBars, PnLTiles, WealthChart } from '../components/PortfolioViz.jsx'
 import { askMentor, MENTOR_MODELS } from '../lib/mentor.js'
 import {
   buildRealContext, clearRealCache, fetchRealData, getCachedRealData,
-  instrumentPrice, realSummary, requestSymbol,
+  periodPnL, portfolioHistory, realSummary, requestSymbol,
 } from '../lib/realportfolio.js'
 import { useStore } from '../lib/store.jsx'
 import {
@@ -160,7 +161,9 @@ export default function MyInvestments() {
   }, [twelveKey, symbolsKey, reloadTick])
 
   const summary = useMemo(() => realSummary(instruments, liveData), [instruments, liveData])
-  const context = useMemo(() => buildRealContext(instruments, liveData, summary), [instruments, liveData, summary])
+  const history = useMemo(() => portfolioHistory(instruments, liveData), [instruments, liveData])
+  const pnl = useMemo(() => periodPnL(history), [history])
+  const context = useMemo(() => buildRealContext(instruments, liveData, summary, pnl), [instruments, liveData, summary, pnl])
   const monitored = summary.rows.filter((r) => r.monitored)
 
   async function getRead(inst) {
@@ -221,7 +224,7 @@ export default function MyInvestments() {
           <div className="row">
             {twelveKey && (
               <button onClick={() => { clearRealCache(); setReloadTick((t) => t + 1) }}>
-                <IconRefresh size={14} /> Refresh prices
+                <IconRefresh size={14} /> Update data
               </button>
             )}
             <button className="primary" onClick={() => setEditingId('new')}>+ Add instrument</button>
@@ -271,6 +274,32 @@ export default function MyInvestments() {
             <div className="stat-value">{instruments.length} · {monitored.length}</div>
           </div>
         </div>
+
+        {history.length > 1 && (
+          <div className="card">
+            <h3 style={{ marginTop: 0 }}>Performance — your money over time</h3>
+            <PnLTiles pnl={pnl} />
+            <WealthChart history={history} costEUR={summary.costEUR} />
+            <p className="small muted" style={{ margin: '8px 0 0' }}>
+              EUR value of your current holdings evaluated over the past year (today's share
+              counts throughout; USD converted through the daily EUR/USD rate; manual-priced
+              positions included as a constant). The dashed line is what those positions cost you.
+            </p>
+          </div>
+        )}
+
+        {summary.valueEUR > 0 && (
+          <div className="grid grid-2">
+            <div className="card" style={{ marginTop: 0 }}>
+              <h3 style={{ marginTop: 0 }}>Allocation</h3>
+              <AllocationBars rows={summary.rows} instruments={instruments} />
+            </div>
+            <div className="card" style={{ marginTop: 0 }}>
+              <h3 style={{ marginTop: 0 }}>P&amp;L by position</h3>
+              <PnLBars rows={summary.rows} />
+            </div>
+          </div>
+        )}
 
         {editingId && (
           <div className="card">

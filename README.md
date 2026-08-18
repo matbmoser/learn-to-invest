@@ -194,6 +194,15 @@ stored only in your browser like everything else.
 - **A docked analyst chat on the left** that sees your real holdings and prices, so you can ask
   "am I too concentrated?" without leaving the dashboard.
 - Totals are shown in EUR, with USD positions converted at the live EUR/USD rate.
+- **Performance analytics**: P&L tiles for today / 1 week / 1 month / 3 months / 1 year, and a
+  wealth-over-time area chart of your holdings' EUR value with your cost basis as a dashed line —
+  so gain or loss reads as the gap.
+- **Allocation and P&L graphics**: horizontal allocation bars (one color per instrument, directly
+  labeled with weight and value) and diverging P&L-by-position bars around a zero baseline.
+- **Your wealth in the sidebar**: total portfolio value and today's move, visible on every page,
+  linking back to the dashboard. An **Update data** button refreshes all live prices on demand.
+
+![Portfolio analytics](docs/screenshots/invest-viz.png)
 
 ![My investments charts](docs/screenshots/invest-charts.png)
 
