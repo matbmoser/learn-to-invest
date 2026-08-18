@@ -178,4 +178,17 @@ export const GLOSSARY = [
   { term: 'Time decay (theta)', def: 'The daily loss of an option\'s or warrant\'s time value, accelerating toward expiry. Being right slowly is a losing trade in decaying instruments.' },
   { term: 'Volatility drag', def: 'The arithmetic loss from compounding leveraged daily returns through chop: +30% then -27.3% is -5.5%, not zero. The structural enemy of factor certificates held long.' },
   { term: 'Warrant', def: 'A securitized call or put option issued by a bank: strike, expiry, premium. Priced by direction, time AND implied volatility — you must be right about all three.' },
+
+  // --- Crypto ---
+  { term: 'Altcoin', def: 'Any cryptocurrency other than Bitcoin. The long tail numbers in the thousands, and most of it goes to approximately zero across a full cycle.' },
+  { term: 'Blockchain', def: 'A shared public ledger kept in sync by thousands of computers, so "who owns what" is a fact no single company or government can quietly edit.' },
+  { term: 'Cold wallet', def: 'A hardware device or offline store for private keys, disconnected from the internet. The safest self-custody — and only as safe as the seed phrase backing it.' },
+  { term: 'Halving', def: 'Bitcoin\'s scheduled supply cut: the rate of new coins halves roughly every four years, enforcing the path to its fixed 21 million cap.' },
+  { term: 'Perpetual futures', def: 'Crypto derivatives with no expiry offering leverage up to 100x. On an asset that moves 20% in a day, routine noise liquidates leveraged positions — the fastest wealth destroyer in retail finance.' },
+  { term: 'Private key / seed phrase', def: 'The secret that IS ownership of crypto: 12-24 words that control the funds. Anyone who reads them owns your coins; lose them and nobody can recover the funds. No legitimate service ever asks for them.' },
+  { term: 'Rug pull', def: 'A token launched, hyped, and drained by its own creators. Habitat: brand-new tokens, anonymous teams, unlocked liquidity.' },
+  { term: 'Spot crypto ETF', def: 'A regulated fund holding crypto, traded in a normal brokerage account — no keys or seed phrases, familiar protections, a small annual fee. The sane default wrapper for most stock investors.' },
+  { term: 'Stablecoin', def: 'A token pegged 1:1 to a currency like the dollar, backed by the issuer\'s reserves — and only as good as those reserves. Plumbing, not safety.' },
+  { term: 'Staking', def: 'Locking coins to help run a proof-of-stake network in exchange for yield — paid in more of the same token, not from external earnings like a dividend.' },
+  { term: 'Tokenomics', def: 'A token\'s supply design: cap or inflation, insider allocations, and unlock schedules. The crypto version of share dilution, often far more aggressive — hostile tokenomics defeats good stories.' },
 ]

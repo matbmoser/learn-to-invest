@@ -12,7 +12,7 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Contents
 
-- [Investing Academy](#investing-academy) — 11 modules, 67 lessons, quizzes
+- [Investing Academy](#investing-academy) — 12 modules, 73 lessons, quizzes
 - [Indicator reference](#indicator-reference) — all 17 indicators, drawn and explained
 - [Pattern lab](#pattern-lab) — back-test 22 signals against their own baseline
 - [AI Mentor](#ai-mentor) — chat with a senior analyst about your own portfolio
@@ -26,7 +26,7 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Investing Academy
 
-Eleven modules and 67 lessons that take you from "what is a stock?" to writing professional
+Twelve modules and 73 lessons that take you from "what is a stock?" to writing professional
 investment theses — modelled on the arc of full investing curricula: foundations → concepts →
 analysis → charts → timing → events → risk → decisions → psychology. Each module ends with a
 quiz, and your progress is saved locally.
@@ -42,8 +42,9 @@ quiz, and your progress is saved locally.
 | 7 | **Company Events & the Big Picture** | Earnings reports and the expectations game, dividends and buybacks, splits / IPOs / spin-offs and other corporate actions, the economic data that moves whole markets, sector rotation across the cycle, and surviving bear markets |
 | 8 | **Risk Management** | Position sizing (the 1–2% rule), stop losses, diversification, risk/reward math, and the traps that destroy beginners |
 | 9 | **When to Buy, When to Sell** | Watchlists, the five-gate buy checklist, lump sum vs scaling in, recognising when a price has outrun the value, the broken-thesis checklist, the exit playbook, and holding as a skill |
-| 10 | **Psychology & Strategy** | Behavioral biases, choosing a strategy, when to sell, and writing your own investment policy statement |
-| 11 | **Think Like a Business Analyst** | Business models, unit economics, Porter's Five Forces, SWOT, moat durability, DCF valuation, and investment theses |
+| 10 | **Crypto: A Different Asset Class** *(elective)* | What a cryptocurrency actually is, the root differences from stocks (no cash flows, no valuation anchor, no safety net), exchanges / wallets / custody and "not your keys, not your coins", analysing tokenomics honestly, satellite sizing with DCA and rebalancing, and the full risk-and-scam field guide |
+| 11 | **Psychology & Strategy** | Behavioral biases, choosing a strategy, when to sell, and writing your own investment policy statement |
+| 12 | **Think Like a Business Analyst** | Business models, unit economics, Porter's Five Forces, SWOT, moat durability, DCF valuation, and investment theses |
 
 ![Academy](docs/screenshots/academy.png)
 
@@ -77,6 +78,12 @@ exit playbook.
 ![Candlestick lesson](docs/screenshots/lesson-charts.png)
 
 ![Buy checklist lesson](docs/screenshots/lesson-decisions.png)
+
+The crypto elective takes neither cult's side: it explains what the technology actually is, why
+the absence of cash flows deletes most of the valuation toolkit, how custody and wrappers work,
+and how to size a position — if any — so that crypto's routine 80% drawdowns are survivable.
+
+![Crypto lesson](docs/screenshots/lesson-crypto.png)
 
 ---
 
@@ -207,7 +214,7 @@ safety.
 
 ![Tools](docs/screenshots/tools.png)
 
-There's also a searchable 155-term glossary in plain English.
+There's also a searchable 166-term glossary in plain English.
 
 ![Glossary](docs/screenshots/glossary.png)
 
