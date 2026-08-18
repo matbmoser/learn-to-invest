@@ -16,6 +16,7 @@
 //
 // This file was generated with AI assistance (Claude Code, Anthropic).
 
+import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import Dashboard from './pages/Dashboard.jsx'
 import Learn from './pages/Learn.jsx'
@@ -29,11 +30,15 @@ import Settings from './pages/Settings.jsx'
 import Mentor from './pages/Mentor.jsx'
 import Indicators from './pages/Indicators.jsx'
 import Patterns from './pages/Patterns.jsx'
+import MyInvestments from './pages/MyInvestments.jsx'
+import Research from './pages/Research.jsx'
 import Footer from './components/Footer.jsx'
 import { useStore } from './lib/store.jsx'
+import { getCachedRealData, periodPnL, portfolioHistory, realSummary } from './lib/realportfolio.js'
 import {
   IconAcademy, IconDashboard, IconGlossary, IconLogo, IconMarket, IconMentor,
   IconMoon, IconPortfolio, IconPulse, IconSearch, IconSettings, IconSun, IconTools,
+  IconTrade, IconClipboard,
 } from './components/icons.jsx'
 
 const links = [
@@ -45,11 +50,51 @@ const links = [
   { to: '/patterns', icon: IconSearch, label: 'Pattern lab' },
   { to: '/glossary', icon: IconGlossary, label: 'Glossary' },
   { section: 'Practice' },
+  { to: '/invest', icon: IconTrade, label: 'My investments' },
+  { to: '/research', icon: IconClipboard, label: 'Research' },
   { to: '/market', icon: IconMarket, label: 'Market' },
   { to: '/portfolio', icon: IconPortfolio, label: 'Portfolio' },
   { to: '/tools', icon: IconTools, label: 'Tools' },
   { to: '/settings', icon: IconSettings, label: 'Settings' },
 ]
+
+// Compact net-worth readout for the sidebar, fed by the My investments
+// data: total EUR value of priced real positions plus today's move.
+function WealthBadge() {
+  const { state } = useStore()
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    const bump = () => setTick((t) => t + 1)
+    window.addEventListener('lti-real-updated', bump)
+    return () => window.removeEventListener('lti-real-updated', bump)
+  }, [])
+  const wealth = useMemo(() => {
+    const instruments = state.realPortfolio?.instruments
+    if (!instruments?.length) return null
+    const data = getCachedRealData()
+    const s = realSummary(instruments, data)
+    if (!(s.valueEUR > 0)) return null
+    const pnl = periodPnL(portfolioHistory(instruments, data))
+    return { total: s.valueEUR, day: pnl?.day || null, unpriced: s.unpriced }
+  }, [state.realPortfolio, tick])
+  if (!wealth) return null
+  const dir = wealth.day == null ? '' : wealth.day.abs >= 0 ? 'up' : 'down'
+  return (
+    <NavLink to="/invest" className="wealth-badge">
+      <div className="stat-label">My wealth</div>
+      <div className="wealth-total">
+        {wealth.total.toLocaleString(undefined, { maximumFractionDigits: 0 })} €
+      </div>
+      {wealth.day && (
+        <div className={'small ' + dir}>
+          {wealth.day.abs >= 0 ? '+' : ''}{wealth.day.abs.toFixed(0)} € today
+          {wealth.day.pct != null ? ` (${wealth.day.pct >= 0 ? '+' : ''}${wealth.day.pct.toFixed(2)}%)` : ''}
+        </div>
+      )}
+      {wealth.unpriced > 0 && <div className="small muted">+{wealth.unpriced} unpriced</div>}
+    </NavLink>
+  )
+}
 
 export default function App() {
   const { state, updateSettings } = useStore()
@@ -81,6 +126,8 @@ export default function App() {
           )
         )}
 
+        <WealthBadge />
+
         <div className="sidebar-foot">
           <button
             className="theme-toggle"
@@ -107,6 +154,8 @@ export default function App() {
           <Route path="/mentor" element={<Mentor />} />
           <Route path="/indicators" element={<Indicators />} />
           <Route path="/patterns" element={<Patterns />} />
+          <Route path="/invest" element={<MyInvestments />} />
+          <Route path="/research" element={<Research />} />
         </Routes>
         <Footer />
       </main>

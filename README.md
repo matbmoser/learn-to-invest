@@ -16,6 +16,8 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 - [Indicator reference](#indicator-reference) — all 17 indicators, drawn and explained
 - [Pattern lab](#pattern-lab) — back-test 22 signals against their own baseline
 - [AI Mentor](#ai-mentor) — chat with a senior analyst about your own portfolio
+- [My investments](#my-investments) — track your real holdings, with live charts and analyst reads
+- [Research](#research) — one company under the microscope, on a shared comparison chart
 - [Market simulator](#market-simulator) — TradingView candlestick charts, indicators, fundamentals
 - [Paper trading](#paper-trading) — a virtual $10,000 portfolio with risk feedback
 - [Analyst tools](#analyst-tools) — position sizing, risk/reward, compounding, DCF
@@ -165,6 +167,73 @@ evidence supports, and declines to tell you what to buy with real money.
 
 Requires your own [Claude API key](https://console.anthropic.com) — see
 [Settings](#settings--api-keys).
+
+---
+
+## My investments
+
+A dashboard for the portfolio you actually own — separate from the practice simulator, and
+stored only in your browser like everything else.
+
+![My investments](docs/screenshots/invest.png)
+
+- **Your real instruments**, pre-seeded with an example mix of German stocks, a world ETF, US
+  stocks and a private company — edit them, remove them, or **add any instrument** (stock, ETF, or
+  private holding without a ticker).
+- **Configure your position**: shares held, average cost, and a manual price for anything without
+  a live feed (private companies, or exchanges outside your data plan).
+- **Choose what to monitor** — monitored instruments get a live chart and analyst reads; the rest
+  just sit in the table.
+- **Live charts with selectable styles** — candles, line, area, or baseline, plus ranges, an
+  SMA-50 overlay and a volume pane — via your Twelve Data key (US symbols work on the free plan;
+  XETRA/LSE listings need a paid plan, and fall back to manual prices with a clear notice).
+- **Analyst reads via the Claude API** — one click per holding produces a structured educational
+  read: what the asset is, how it has been behaving, what an analyst would watch next, the risks
+  of *your* position (including overlaps like owning Apple twice through a world ETF), and which
+  Academy module to study next. Teaching, never buy/sell instructions.
+- **A docked analyst chat on the left** that sees your real holdings and prices, so you can ask
+  "am I too concentrated?" without leaving the dashboard.
+- Totals are shown in EUR, with USD positions converted at the live EUR/USD rate.
+- **Performance analytics**: P&L tiles for today / 1 week / 1 month / 3 months / 1 year, and a
+  wealth-over-time area chart of your holdings' EUR value with your cost basis as a dashed line —
+  so gain or loss reads as the gap.
+- **Allocation and P&L graphics**: horizontal allocation bars (one color per instrument, directly
+  labeled with weight and value) and diverging P&L-by-position bars around a zero baseline.
+- **Your wealth in the sidebar**: total portfolio value and today's move, visible on every page,
+  linking back to the dashboard. An **Update data** button refreshes all live prices on demand.
+
+![Portfolio analytics](docs/screenshots/invest-viz.png)
+
+![My investments charts](docs/screenshots/invest-charts.png)
+
+---
+
+## Research
+
+An interactive research dashboard built around one idea: **change the company you are researching,
+and every panel follows — but the comparison chart is shared.** Companies you pin stay drawn on it
+while you move between targets, so the side-by-side context survives the whole session (and a
+reload).
+
+![Research](docs/screenshots/research.png)
+
+- **Shared normalized chart** — every line starts at 0% at the start of the range, so a $9 stock
+  and a $400 stock compare fairly. Pin and unpin companies as chips; the researched one is drawn
+  thicker.
+- **Snapshot panel** — price, 1M/1Y performance, volatility, worst drawdown, position in the
+  52-week range.
+- **Live indicator readings** — SMA structure, RSI, MACD, ADX, ATR and OBV, each as a plain-English
+  sentence with a bullish/bearish/neutral pill, recomputed for whichever company is selected.
+- **Fundamentals & health score**, with jump links to the full chart page and to the AI mentor
+  pre-focused on the company.
+- **Relative performance table** for the researched company against everything pinned.
+- **Per-company research notes** — the Academy's watchlist discipline made concrete: write the
+  thesis, the price you'd pay, and what would change your mind; notes persist per ticker.
+- **A research analyst chat docked on the right**, with an **"Analyse my situation"** button in the
+  top-right corner: one click streams a structured read of everything on the dashboard — the
+  researched company's numbers and indicator states, your pinned comparisons, your own notes, and
+  your real portfolio — ending with concrete next steps and the Academy lesson that fills your
+  biggest current gap. Tips and follow-up questions continue in the same chat.
 
 ---
 
