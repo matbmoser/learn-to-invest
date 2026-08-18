@@ -12,7 +12,7 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Contents
 
-- [Investing Academy](#investing-academy) — 8 modules, 47 lessons, quizzes
+- [Investing Academy](#investing-academy) — 11 modules, 66 lessons, quizzes
 - [Indicator reference](#indicator-reference) — all 17 indicators, drawn and explained
 - [Pattern lab](#pattern-lab) — back-test 22 signals against their own baseline
 - [AI Mentor](#ai-mentor) — chat with a senior analyst about your own portfolio
@@ -26,19 +26,24 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Investing Academy
 
-Eight modules and 47 lessons that take you from "what is a stock?" to writing professional
-investment theses. Each module ends with a quiz, and your progress is saved locally.
+Eleven modules and 66 lessons that take you from "what is a stock?" to writing professional
+investment theses — modelled on the arc of full investing curricula: foundations → concepts →
+analysis → charts → timing → events → risk → decisions → psychology. Each module ends with a
+quiz, and your progress is saved locally.
 
 | # | Module | What you learn |
 |---|--------|----------------|
 | 1 | **Investing Foundations** | What a stock is, how markets and orders work, and how to set yourself up safely before risking a dollar |
 | 2 | **Financial Concepts** *(basic → advanced)* | Time value of money and compounding, inflation and real returns, interest rates and the economic cycle, bonds and the yield curve, the mathematics of risk (volatility, correlation, beta, CAPM, Sharpe), cost of capital and WACC vs ROIC, and instruments from ETFs to options, leverage and short selling |
 | 3 | **Fundamental Analysis** | The three financial statements, valuation ratios (P/E, P/S), health ratios, moats, and a repeatable analysis checklist |
-| 4 | **Technical Analysis & Timing** | Trends and support/resistance, moving averages, the four families of indicators, oscillators compared, trend strength with ADX, volatility and volume tools, building a non-redundant indicator set, and honest buy/sell signals |
-| 5 | **Prediction & Pattern Recognition** | Whether prices can be predicted at all, base rates, chart and candlestick patterns, seasonality and calendar effects, the traps that make a back-test lie, and thinking in probabilities |
-| 6 | **Risk Management** | Position sizing (the 1–2% rule), stop losses, diversification, risk/reward math, and the traps that destroy beginners |
-| 7 | **Psychology & Strategy** | Behavioral biases, choosing a strategy, when to sell, and writing your own investment policy statement |
-| 8 | **Think Like a Business Analyst** | Business models, unit economics, Porter's Five Forces, SWOT, moat durability, DCF valuation, and investment theses |
+| 4 | **Reading Charts from Zero** | What a chart actually records, how a candlestick is built from four prices, timeframes and aggregation, volume as a conviction meter, log scales / gaps / adjusted prices, and a repeatable five-step chart read |
+| 5 | **Technical Analysis & Timing** | Trends and support/resistance, moving averages, the four families of indicators, oscillators compared, trend strength with ADX, volatility and volume tools, building a non-redundant indicator set, and honest buy/sell signals |
+| 6 | **Prediction & Pattern Recognition** | Whether prices can be predicted at all, base rates, chart and candlestick patterns, seasonality and calendar effects, the traps that make a back-test lie, and thinking in probabilities |
+| 7 | **Company Events & the Big Picture** | Earnings reports and the expectations game, dividends and buybacks, splits / IPOs / spin-offs and other corporate actions, the economic data that moves whole markets, sector rotation across the cycle, and surviving bear markets |
+| 8 | **Risk Management** | Position sizing (the 1–2% rule), stop losses, diversification, risk/reward math, and the traps that destroy beginners |
+| 9 | **When to Buy, When to Sell** | Watchlists, the five-gate buy checklist, lump sum vs scaling in, recognising when a price has outrun the value, the broken-thesis checklist, the exit playbook, and holding as a skill |
+| 10 | **Psychology & Strategy** | Behavioral biases, choosing a strategy, when to sell, and writing your own investment policy statement |
+| 11 | **Think Like a Business Analyst** | Business models, unit economics, Porter's Five Forces, SWOT, moat durability, DCF valuation, and investment theses |
 
 ![Academy](docs/screenshots/academy.png)
 
@@ -47,17 +52,25 @@ that actually cost people money.
 
 ![Lesson](docs/screenshots/lesson.png)
 
-Module 2 runs from first principles to the machinery professionals actually use, so that concepts
+The Financial Concepts module runs from first principles to the machinery professionals actually use, so that concepts
 like discounting, duration and cost of capital are already familiar when later modules rely on them.
 
 ![Financial concepts lesson](docs/screenshots/lesson-concepts.png)
 
 ![Indicator lesson](docs/screenshots/lesson-indicators.png)
 
-Module 5 turns the sceptical eye on prediction itself — and hands you the [Pattern lab](#pattern-lab)
-to test any claim you are told.
+The prediction module turns the sceptical eye on prediction itself — and hands you the
+[Pattern lab](#pattern-lab) to test any claim you are told. The chart-reading module teaches the
+candlestick from scratch — how each bar is built from four prices, what timeframes and volume
+mean, and a five-step routine for reading any chart. And the buy/sell module is the capstone:
+watchlist → five buy gates → entry methods → overvaluation and broken-thesis checklists → the
+exit playbook.
 
 ![Prediction lesson](docs/screenshots/lesson-prediction.png)
+
+![Candlestick lesson](docs/screenshots/lesson-charts.png)
+
+![Buy checklist lesson](docs/screenshots/lesson-decisions.png)
 
 ---
 
@@ -86,7 +99,7 @@ in their own pane, exactly as they appear on a real chart.
 
 The page is deliberately honest about redundancy: Williams %R is mathematically the stochastic
 minus 100, and stacking five momentum oscillators is one opinion counted five times, not
-confirmation. Module 4 of the Academy teaches the theory and how to assemble a set of four
+confirmation. The Technical Analysis module of the Academy teaches the theory and how to assemble a set of four
 indicators that actually disagree with each other usefully.
 
 ---
@@ -188,7 +201,7 @@ safety.
 
 ![Tools](docs/screenshots/tools.png)
 
-There's also a searchable 118-term glossary in plain English.
+There's also a searchable 145-term glossary in plain English.
 
 ![Glossary](docs/screenshots/glossary.png)
 

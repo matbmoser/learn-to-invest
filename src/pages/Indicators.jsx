@@ -109,7 +109,7 @@ export default function Indicators() {
         what it measures, how to read it, what it is saying about this chart right now, and where it
         misleads you. Change the stock and the range to watch each one behave in different
         conditions. The theory behind them is in{' '}
-        <Link to="/learn/technical/indicator-families">Module 4 of the Academy</Link>.
+        <Link to="/learn/technical/indicator-families">the Technical Analysis module</Link>.
       </p>
 
       <div className="card ind-controls">

@@ -177,7 +177,8 @@ export const ICONS = {
   tools: IconTools, settings: IconSettings,
   sprout: IconSprout, search: IconSearch, trend: IconTrend,
   shield: IconShield, brain: IconBrain, analyst: IconAnalyst,
-  finance: IconFinance,
+  finance: IconFinance, pulse: IconPulse, compass: IconCompass,
+  scale: IconScale,
 }
 
 export function Icon({ name, ...rest }) {

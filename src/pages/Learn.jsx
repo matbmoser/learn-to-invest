@@ -27,7 +27,8 @@ export default function Learn() {
     <div>
       <h1><IconAcademy size={24} /> Investing Academy</h1>
       <p className="subtitle">
-        Six modules, from "what is a stock?" to writing professional investment theses.
+        {MODULES.length} modules and {MODULES.reduce((n, m) => n + m.lessons.length, 0)} lessons,
+        from "what is a stock?" to writing professional investment theses.
         Work in order — each module builds on the last. Finish a module's lessons to unlock
         its quiz, and practice every concept in the simulator as you go.
       </p>
