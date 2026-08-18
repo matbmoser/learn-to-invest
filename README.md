@@ -12,8 +12,9 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Contents
 
-- [Investing Academy](#investing-academy) — 7 modules, 40 lessons, quizzes
+- [Investing Academy](#investing-academy) — 8 modules, 47 lessons, quizzes
 - [Indicator reference](#indicator-reference) — all 17 indicators, drawn and explained
+- [Pattern lab](#pattern-lab) — back-test 22 signals against their own baseline
 - [AI Mentor](#ai-mentor) — chat with a senior analyst about your own portfolio
 - [Market simulator](#market-simulator) — TradingView candlestick charts, indicators, fundamentals
 - [Paper trading](#paper-trading) — a virtual $10,000 portfolio with risk feedback
@@ -25,7 +26,7 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Investing Academy
 
-Seven modules and 40 lessons that take you from "what is a stock?" to writing professional
+Eight modules and 47 lessons that take you from "what is a stock?" to writing professional
 investment theses. Each module ends with a quiz, and your progress is saved locally.
 
 | # | Module | What you learn |
@@ -34,9 +35,10 @@ investment theses. Each module ends with a quiz, and your progress is saved loca
 | 2 | **Financial Concepts** *(basic → advanced)* | Time value of money and compounding, inflation and real returns, interest rates and the economic cycle, bonds and the yield curve, the mathematics of risk (volatility, correlation, beta, CAPM, Sharpe), cost of capital and WACC vs ROIC, and instruments from ETFs to options, leverage and short selling |
 | 3 | **Fundamental Analysis** | The three financial statements, valuation ratios (P/E, P/S), health ratios, moats, and a repeatable analysis checklist |
 | 4 | **Technical Analysis & Timing** | Trends and support/resistance, moving averages, the four families of indicators, oscillators compared, trend strength with ADX, volatility and volume tools, building a non-redundant indicator set, and honest buy/sell signals |
-| 5 | **Risk Management** | Position sizing (the 1–2% rule), stop losses, diversification, risk/reward math, and the traps that destroy beginners |
-| 6 | **Psychology & Strategy** | Behavioral biases, choosing a strategy, when to sell, and writing your own investment policy statement |
-| 7 | **Think Like a Business Analyst** | Business models, unit economics, Porter's Five Forces, SWOT, moat durability, DCF valuation, and investment theses |
+| 5 | **Prediction & Pattern Recognition** | Whether prices can be predicted at all, base rates, chart and candlestick patterns, seasonality and calendar effects, the traps that make a back-test lie, and thinking in probabilities |
+| 6 | **Risk Management** | Position sizing (the 1–2% rule), stop losses, diversification, risk/reward math, and the traps that destroy beginners |
+| 7 | **Psychology & Strategy** | Behavioral biases, choosing a strategy, when to sell, and writing your own investment policy statement |
+| 8 | **Think Like a Business Analyst** | Business models, unit economics, Porter's Five Forces, SWOT, moat durability, DCF valuation, and investment theses |
 
 ![Academy](docs/screenshots/academy.png)
 
@@ -51,6 +53,11 @@ like discounting, duration and cost of capital are already familiar when later m
 ![Financial concepts lesson](docs/screenshots/lesson-concepts.png)
 
 ![Indicator lesson](docs/screenshots/lesson-indicators.png)
+
+Module 5 turns the sceptical eye on prediction itself — and hands you the [Pattern lab](#pattern-lab)
+to test any claim you are told.
+
+![Prediction lesson](docs/screenshots/lesson-prediction.png)
 
 ---
 
@@ -81,6 +88,36 @@ The page is deliberately honest about redundancy: Williams %R is mathematically 
 minus 100, and stacking five momentum oscillators is one opinion counted five times, not
 confirmation. Module 4 of the Academy teaches the theory and how to assemble a set of four
 indicators that actually disagree with each other usefully.
+
+---
+
+## Pattern lab
+
+The Academy teaches that most patterns are noise. The Pattern lab lets you **check that yourself**
+instead of taking anyone's word for it.
+
+Pick one of **22 signals** — candlestick patterns (engulfing, hammer, shooting star, doji, morning
+and evening star, three white soldiers…), indicator conditions (RSI oversold, MACD cross, golden
+cross, price crossing above the 200-day, Bollinger squeeze, ADX trend strength, new 52-week highs),
+or calendar effects (Mondays, turn of the month, sell in May) — and it is back-tested across every
+stock in the market.
+
+![Pattern lab](docs/screenshots/patterns.png)
+
+Every result is reported the honest way:
+
+- **Forward returns at five horizons** — 1, 5, 10, 20 and 60 days after the signal.
+- **Always against a baseline** — what happened after *all other* days. A 55% win rate means nothing
+  if the stock rose on 55% of days anyway.
+- **Sample size first** — under 30 occurrences the app refuses to draw a conclusion.
+- **Significance *and* effect size** — a difference can be statistically real and still far too
+  small to trade, and the verdict says so.
+- **Every hit marked on the chart**, so you can see the ones that worked and the ones that didn't.
+
+![Pattern lab chart](docs/screenshots/patterns-chart.png)
+
+The market here is a random walk, so most signals correctly come back as "no edge" — which is the
+lesson. The same discipline applied to real data is what separates analysis from pattern-matching.
 
 ---
 
@@ -151,7 +188,7 @@ safety.
 
 ![Tools](docs/screenshots/tools.png)
 
-There's also a searchable 95-term glossary in plain English.
+There's also a searchable 118-term glossary in plain English.
 
 ![Glossary](docs/screenshots/glossary.png)
 

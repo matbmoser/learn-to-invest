@@ -28,11 +28,12 @@ import Glossary from './pages/Glossary.jsx'
 import Settings from './pages/Settings.jsx'
 import Mentor from './pages/Mentor.jsx'
 import Indicators from './pages/Indicators.jsx'
+import Patterns from './pages/Patterns.jsx'
 import Footer from './components/Footer.jsx'
 import { useStore } from './lib/store.jsx'
 import {
   IconAcademy, IconDashboard, IconGlossary, IconLogo, IconMarket, IconMentor,
-  IconMoon, IconPortfolio, IconPulse, IconSettings, IconSun, IconTools,
+  IconMoon, IconPortfolio, IconPulse, IconSearch, IconSettings, IconSun, IconTools,
 } from './components/icons.jsx'
 
 const links = [
@@ -41,6 +42,7 @@ const links = [
   { to: '/learn', icon: IconAcademy, label: 'Academy' },
   { to: '/mentor', icon: IconMentor, label: 'AI Mentor' },
   { to: '/indicators', icon: IconPulse, label: 'Indicators' },
+  { to: '/patterns', icon: IconSearch, label: 'Pattern lab' },
   { to: '/glossary', icon: IconGlossary, label: 'Glossary' },
   { section: 'Practice' },
   { to: '/market', icon: IconMarket, label: 'Market' },
@@ -104,6 +106,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/mentor" element={<Mentor />} />
           <Route path="/indicators" element={<Indicators />} />
+          <Route path="/patterns" element={<Patterns />} />
         </Routes>
         <Footer />
       </main>
