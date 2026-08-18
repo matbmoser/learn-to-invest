@@ -196,7 +196,17 @@ stored only in your browser like everything else.
   Academy module to study next. Teaching, never buy/sell instructions.
 - **A docked analyst chat on the left** that sees your real holdings and prices, so you can ask
   "am I too concentrated?" without leaving the dashboard.
-- Totals are shown in EUR, with USD positions converted at the live EUR/USD rate.
+- **Everything in euro.** Prices, costs, values and P&L are shown in EUR, with the native quote
+  underneath and the exact rates used printed above the table. USD, GBP, CHF, SEK, DKK, NOK and
+  PLN positions convert through their own live daily rates (forex is free on every Twelve Data
+  plan), and the wealth history converts day by day rather than at today's rate.
+- **European markets catalog** — a searchable list of 43 major European listings (Xetra, Euronext
+  Paris/Amsterdam, Bolsa de Madrid, Borsa Italiana, LSE, SIX, Nasdaq Stockholm) with the exact
+  symbol and exchange codes the API expects, plus UCITS ETFs like EUNL, VWCE and SXR8. One click
+  adds a holding with its currency and US chart proxy already filled in.
+- **Data coverage check** in Settings: probes your own key with a US, a Xetra, a London and an FX
+  symbol and reports precisely what your plan returns — the honest answer to “why is my European
+  stock empty?”
 - **Performance analytics**: P&L tiles for today / 1 week / 1 month / 3 months / 1 year, and a
   wealth-over-time area chart of your holdings' EUR value with your cost basis as a dashed line —
   so gain or loss reads as the gap.

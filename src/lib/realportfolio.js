@@ -38,7 +38,23 @@ export const SEED_INSTRUMENTS = [
   { id: 'vw', name: 'Volkswagen (Vz.)', symbol: 'VOW3', exchange: 'XETR', currency: 'EUR', type: 'stock', shares: 0, avgCost: 0, manualPrice: 0, monitored: true },
 ]
 
-const CACHE_KEY = 'lti-real-cache-v1'
+const CACHE_KEY = 'lti-real-cache-v2'
+
+// Currencies the tracker can convert into EUR. Forex is on Twelve Data's
+// free plan, so these pairs cost credits but never plan errors.
+export const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'SEK', 'DKK', 'NOK', 'PLN']
+export const CURRENCY_SYMBOL = {
+  EUR: '€', USD: '$', GBP: '£', CHF: 'CHF', SEK: 'kr', DKK: 'kr', NOK: 'kr', PLN: 'zł',
+}
+const fxPair = (c) => `EUR/${c}`
+
+// EUR value of an amount in `currency`. rates maps currency -> units per EUR.
+export function toEUR(amount, currency, rates) {
+  if (amount == null) return null
+  if (currency === 'EUR') return amount
+  const r = rates?.[currency]
+  return r ? amount / r : null
+}
 
 function todayStamp() {
   return new Date().toISOString().slice(0, 10)
@@ -99,13 +115,13 @@ export function getCachedRealData() {
     if (!raw) return null
     const key = raw.length + raw.slice(0, 40)
     if (cacheMemo.key === key) return cacheMemo.value
-    const { stamp, data, failed, fx } = JSON.parse(raw)
+    const { stamp, data, failed, fx, rates } = JSON.parse(raw)
     if (stamp !== todayStamp()) return null
     const out = {}
     for (const [sym, rows] of Object.entries(data)) {
       out[sym] = rows.map((r) => ({ ...r, date: new Date(r.date) }))
     }
-    const value = { data: out, failed: failed || {}, fx: fx || null }
+    const value = { data: out, failed: failed || {}, fx: fx || null, rates: rates || (fx ? { USD: fx } : {}) }
     cacheMemo = { key, value }
     return value
   } catch {
@@ -125,7 +141,10 @@ export async function fetchRealData(apiKey, instruments) {
     ...instruments.map(requestSymbol),
     ...instruments.map(chartSymbol),
   ].filter(Boolean))]
-  const all = [...syms, 'EUR/USD']
+  // one FX pair per non-EUR currency actually in use
+  const needed = [...new Set(instruments.map((i) => i.currency).filter((c) => c && c !== 'EUR'))]
+  const fxSyms = needed.map(fxPair)
+  const all = [...syms, ...fxSyms]
   const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(all.join(','))}&interval=1day&outputsize=400&apikey=${encodeURIComponent(apiKey)}`
 
   let res
@@ -156,15 +175,22 @@ export async function fetchRealData(apiKey, instruments) {
     if (series && series.length >= 20) data[sym] = series
     else failed[sym] = bySym[sym]?.message || 'No data returned for this symbol.'
   }
-  const fxSeries = parseSeries(bySym['EUR/USD'])
-  const fx = fxSeries?.length ? fxSeries[fxSeries.length - 1].close : null
-  if (fxSeries?.length) data['EUR/USD'] = fxSeries
+  const rates = {}
+  for (const c of needed) {
+    const rows = parseSeries(bySym[fxPair(c)])
+    if (rows?.length) {
+      data[fxPair(c)] = rows
+      rates[c] = rows[rows.length - 1].close
+    }
+  }
+  const fx = rates.USD ?? null
 
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({
       stamp: todayStamp(),
       failed,
       fx,
+      rates,
       data: Object.fromEntries(Object.entries(data).map(([sym, rows]) => [
         sym, rows.map((r) => ({ ...r, date: r.date.toISOString() })),
       ])),
@@ -173,7 +199,7 @@ export async function fetchRealData(apiKey, instruments) {
   cacheMemo = { key: '', value: null }
   try { window.dispatchEvent(new Event('lti-real-updated')) } catch { /* SSR/tests */ }
 
-  return { data, failed, fx }
+  return { data, failed, fx, rates }
 }
 
 // Best-known price for an instrument: live close when we have a series,
@@ -222,18 +248,15 @@ export function priceProblem(inst, liveData) {
   }
 }
 
-// EUR value of one instrument position (USD converted via EUR/USD rate).
-function positionValueEUR(inst, priceInfo, fx) {
+// EUR value of one instrument position, via the FX rates table.
+function positionValueEUR(inst, priceInfo, rates) {
   if (priceInfo.price == null || !inst.shares) return null
-  const native = priceInfo.price * inst.shares
-  if (inst.currency === 'EUR') return native
-  if (inst.currency === 'USD' && fx) return native / fx
-  return null
+  return toEUR(priceInfo.price * inst.shares, inst.currency, rates)
 }
 
 // Summarises the whole real portfolio at current prices.
 export function realSummary(instruments, liveData) {
-  const fx = liveData?.fx || null
+  const rates = liveData?.rates || (liveData?.fx ? { USD: liveData.fx } : {})
   let valueEUR = 0
   let costEUR = 0
   let priced = 0
@@ -241,22 +264,26 @@ export function realSummary(instruments, liveData) {
   const rows = instruments.map((inst) => {
     const p = instrumentPrice(inst, liveData)
     const value = p.price != null ? p.price * inst.shares : null
-    const vEUR = positionValueEUR(inst, p, fx)
+    const vEUR = positionValueEUR(inst, p, rates)
     const cost = inst.avgCost * inst.shares
-    const cEUR = inst.currency === 'EUR' ? cost : (fx ? cost / fx : null)
+    const cEUR = toEUR(cost, inst.currency, rates)
     if (vEUR != null && inst.shares > 0) { valueEUR += vEUR; priced++ } else if (inst.shares > 0) { unpriced++ }
     if (cEUR != null && inst.shares > 0) costEUR += cEUR
     return {
       ...inst,
       priceInfo: p,
+      priceEUR: toEUR(p.price, inst.currency, rates),
+      avgCostEUR: toEUR(inst.avgCost, inst.currency, rates),
       value,
       valueEUR: vEUR,
       cost,
+      costEUR: cEUR,
       gain: value != null && cost > 0 ? value - cost : null,
+      gainEUR: vEUR != null && cEUR > 0 ? vEUR - cEUR : null,
       gainPct: value != null && cost > 0 ? ((value - cost) / cost) * 100 : null,
     }
   })
-  return { rows, valueEUR, costEUR, gainEUR: valueEUR - costEUR, priced, unpriced, fx }
+  return { rows, valueEUR, costEUR, gainEUR: valueEUR - costEUR, priced, unpriced, rates, fx: rates.USD ?? null }
 }
 
 // Compact context block so the analyst chat and the per-position reads see
@@ -311,9 +338,13 @@ export function buildRealContext(instruments, liveData, summary, pnl) {
 export function portfolioHistory(instruments, liveData) {
   const owned = instruments.filter((i) => i.shares > 0)
   if (!owned.length || !liveData?.data) return []
-  const fxRows = liveData.data['EUR/USD'] || []
-  const fxMap = new Map(fxRows.map((r) => [r.date.toISOString().slice(0, 10), r.close]))
-  const latestFx = liveData.fx || (fxRows.length ? fxRows[fxRows.length - 1].close : null)
+  const rates = liveData.rates || (liveData.fx ? { USD: liveData.fx } : {})
+  // daily rate lookup per currency, so history is currency-correct
+  const fxMaps = {}
+  for (const c of CURRENCIES) {
+    const rows = liveData.data[fxPair(c)]
+    if (rows?.length) fxMaps[c] = new Map(rows.map((r) => [r.date.toISOString().slice(0, 10), r.close]))
+  }
 
   const live = []
   let manualEUR = 0
@@ -326,27 +357,27 @@ export function portfolioHistory(instruments, liveData) {
       live.push({ inst, map, first: rows[0].close })
       for (const k of map.keys()) dates.add(k)
     } else if (inst.manualPrice > 0) {
-      const native = inst.manualPrice * inst.shares
-      manualEUR += inst.currency === 'USD' ? (latestFx ? native / latestFx : 0) : native
+      manualEUR += toEUR(inst.manualPrice * inst.shares, inst.currency, rates) || 0
     }
   }
   if (!live.length) return []
 
   const sorted = [...dates].sort().slice(-400)
   const lastClose = new Map()
-  let lastFx = fxRows.length ? fxRows[0].close : latestFx
+  const lastRate = { ...rates }
   const out = []
   for (const day of sorted) {
-    if (fxMap.has(day)) lastFx = fxMap.get(day)
+    for (const [c, map] of Object.entries(fxMaps)) {
+      if (map.has(day)) lastRate[c] = map.get(day)
+    }
     let total = manualEUR
     let complete = true
     for (const { inst, map, first } of live) {
       if (map.has(day)) lastClose.set(inst.id, map.get(day))
       const close = lastClose.get(inst.id) ?? first
-      const native = close * inst.shares
-      if (inst.currency === 'EUR') total += native
-      else if (lastFx) total += native / lastFx
-      else complete = false
+      const eur = toEUR(close * inst.shares, inst.currency, lastRate)
+      if (eur == null) complete = false
+      else total += eur
     }
     if (complete) out.push({ date: new Date(day + 'T00:00:00Z'), value: total })
   }

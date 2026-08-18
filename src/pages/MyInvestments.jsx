@@ -29,16 +29,27 @@ import AnalystDock from '../components/AnalystDock.jsx'
 import { AllocationBars, PnLBars, PnLTiles, WealthChart } from '../components/PortfolioViz.jsx'
 import { askMentor, MENTOR_MODELS } from '../lib/mentor.js'
 import {
-  buildRealContext, chartSymbol, clearRealCache, fetchRealData, getCachedRealData,
-  periodPnL, portfolioHistory, priceProblem, proxyHint, realSummary, requestSymbol,
+  buildRealContext, chartSymbol, clearRealCache, CURRENCIES, CURRENCY_SYMBOL,
+  fetchRealData, getCachedRealData, periodPnL, portfolioHistory, priceProblem,
+  proxyHint, realSummary, requestSymbol,
 } from '../lib/realportfolio.js'
+import { EXCHANGES, searchEuropean } from '../data/europeanMarkets.js'
 import { useStore } from '../lib/store.jsx'
 import {
-  IconCheck, IconMentor, IconPulse, IconRefresh, IconTrade, IconWarning, IconX,
+  IconCheck, IconMentor, IconPulse, IconRefresh, IconSearch, IconTrade, IconWarning, IconX,
 } from '../components/icons.jsx'
 
 const cur = (n, c = 'EUR', digits = 2) =>
-  n == null ? '—' : `${n.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })} ${c === 'EUR' ? '€' : '$'}`
+  n == null ? '—' : `${n.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })} ${CURRENCY_SYMBOL[c] || c}`
+// EUR headline with the native amount underneath when they differ.
+const eurCell = (eurValue, nativeValue, currency, digits = 2) => (
+  <>
+    {cur(eurValue, 'EUR', digits)}
+    {currency !== 'EUR' && nativeValue != null && (
+      <div className="small muted">{cur(nativeValue, currency, digits)}</div>
+    )}
+  </>
+)
 const pctFmt = (v) => (v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`)
 
 const EMPTY_FORM = {
@@ -90,10 +101,9 @@ function InstrumentForm({ initial, onSave, onCancel }) {
             <input value={f.exchange} onChange={set('exchange')} placeholder="e.g. XETR" />
           </label>
         )}
-        <label>Currency
+        <label>Currency <span className="muted">(as quoted)</span>
           <select value={f.currency} onChange={set('currency')}>
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
+            {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </label>
         <label>Shares you own
@@ -126,6 +136,61 @@ function InstrumentForm({ initial, onSave, onCancel }) {
   )
 }
 
+function EuropeanPicker({ onPick, onClose }) {
+  const [q, setQ] = useState('')
+  const results = searchEuropean(q).slice(0, 40)
+  return (
+    <div className="card">
+      <div className="row spread" style={{ marginBottom: 8 }}>
+        <h3 style={{ margin: 0 }}>European markets</h3>
+        <button className="toggle-chip" onClick={onClose} aria-label="Close catalog"><IconX size={13} /></button>
+      </div>
+      <p className="small secondary" style={{ marginTop: 0 }}>
+        Major European listings with the exact symbol and exchange codes the data API expects — so
+        you never have to guess. Picking one fills in everything, including a US chart proxy.
+      </p>
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Search name, ticker, sector or exchange… (e.g. Siemens, ETF, XETR)"
+        style={{ width: '100%', maxWidth: 420, marginBottom: 10 }}
+        aria-label="Search European instruments"
+      />
+      <div className="table-wrap" style={{ maxHeight: 320, overflowY: 'auto' }}>
+        <table>
+          <thead>
+            <tr><th>Instrument</th><th>Symbol</th><th>Exchange</th><th>Currency</th><th></th></tr>
+          </thead>
+          <tbody>
+            {results.map((i) => (
+              <tr key={`${i.symbol}:${i.exchange}`}>
+                <td>
+                  {i.name}
+                  {i.type === 'etf' && <span className="pill neutral" style={{ marginLeft: 6 }}>ETF</span>}
+                  <div className="small muted">{i.sector}</div>
+                </td>
+                <td className="small muted">{i.symbol}</td>
+                <td className="small muted">{i.exchange}</td>
+                <td className="small muted">{i.currency}</td>
+                <td className="num"><button className="toggle-chip" onClick={() => onPick(i)}>Add</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {results.length === 0 && (
+        <p className="small muted">
+          Nothing matches "{q}" — add it by hand with <strong>+ Add instrument</strong>; any
+          symbol/exchange pair your data plan supports will work.
+        </p>
+      )}
+      <p className="small muted" style={{ marginBottom: 0 }}>
+        Exchanges covered: {EXCHANGES.map((e) => e.code).join(' · ')}
+      </p>
+    </div>
+  )
+}
+
 export default function MyInvestments() {
   const { state, addInstrument, updateInstrument, removeInstrument, setRead, setRealChat } = useStore()
   const instruments = state.realPortfolio.instruments || []
@@ -139,6 +204,7 @@ export default function MyInvestments() {
   const [reloadTick, setReloadTick] = useState(0)
   const [editingId, setEditingId] = useState(null) // instrument id | 'new' | null
   const [dockOpen, setDockOpen] = useState(true)
+  const [catalogOpen, setCatalogOpen] = useState(false)
   const [readBusy, setReadBusy] = useState(null) // instrument id being analysed
 
   const symbolsKey = instruments.map(requestSymbol).filter(Boolean).join(',')
@@ -246,6 +312,9 @@ export default function MyInvestments() {
                 <IconRefresh size={14} /> Update data
               </button>
             )}
+            <button onClick={() => { setCatalogOpen(true); setEditingId(null) }}>
+              <IconSearch size={14} /> European markets
+            </button>
             <button className="primary" onClick={() => setEditingId('new')}>+ Add instrument</button>
           </div>
         </div>
@@ -308,9 +377,10 @@ export default function MyInvestments() {
             <PnLTiles pnl={pnl} />
             <WealthChart history={history} costEUR={summary.costEUR} />
             <p className="small muted" style={{ margin: '8px 0 0' }}>
-              EUR value of your current holdings evaluated over the past year (today's share
-              counts throughout; USD converted through the daily EUR/USD rate; manual-priced
-              positions included as a constant). The dashed line is what those positions cost you.
+              EUR value of your current holdings evaluated over the past year — today's share
+              counts throughout, every non-euro position converted through its own daily EUR rate,
+              manual-priced positions included as a constant. The dashed line is what those
+              positions cost you, so the gap between line and curve is your gain or loss.
             </p>
           </div>
         )}
@@ -326,6 +396,21 @@ export default function MyInvestments() {
               <PnLBars rows={summary.rows} />
             </div>
           </div>
+        )}
+
+        {catalogOpen && (
+          <EuropeanPicker
+            onClose={() => setCatalogOpen(false)}
+            onPick={(i) => {
+              const id = `${i.symbol}-${i.exchange}`.toLowerCase() + '-' + Date.now().toString(36)
+              addInstrument({
+                id, name: i.name, symbol: i.symbol, exchange: i.exchange,
+                currency: i.currency, type: i.type, shares: 0, avgCost: 0,
+                manualPrice: 0, chartSymbol: i.proxy || '', monitored: true,
+              })
+              setCatalogOpen(false)
+            }}
+          />
         )}
 
         {editingId && (
@@ -349,6 +434,13 @@ export default function MyInvestments() {
             Set your share counts with <strong>Edit</strong> (they start at zero). <strong>Monitor</strong> chooses
             which instruments get charts and analyst reads below.
           </p>
+          {summary.rates && Object.keys(summary.rates).length > 0 && (
+            <p className="small muted" style={{ marginTop: 0 }}>
+              Everything is shown in euro. Rates used:{' '}
+              {Object.entries(summary.rates).map(([c, r]) => `1 € = ${r.toFixed(4)} ${c}`).join(' · ')}
+              {' '}(live daily rates; the native quote is shown underneath each converted figure).
+            </p>
+          )}
           <div className="table-wrap">
             <table>
               <thead>
@@ -356,7 +448,7 @@ export default function MyInvestments() {
                   <th>Instrument</th><th>Symbol</th>
                   <th className="num">Shares</th><th className="num">Avg cost</th>
                   <th className="num">Price</th><th className="num">Today</th>
-                  <th className="num">Value</th><th className="num">P&amp;L</th>
+                  <th className="num">Value €</th><th className="num">P&amp;L</th>
                   <th>Monitor</th><th></th>
                 </tr>
               </thead>
@@ -371,10 +463,10 @@ export default function MyInvestments() {
                     </td>
                     <td className="small muted">{r.symbol ? `${r.symbol}${r.exchange ? ':' + r.exchange : ''}` : '—'}</td>
                     <td className="num">{r.shares || '—'}</td>
-                    <td className="num">{r.avgCost ? cur(r.avgCost, r.currency) : '—'}</td>
+                    <td className="num">{r.avgCost ? eurCell(r.avgCostEUR, r.avgCost, r.currency) : '—'}</td>
                     <td className="num">
-                      {r.priceInfo.price != null ? cur(r.priceInfo.price, r.currency) : '—'}
-                      {r.priceInfo.source === 'manual' && <span className="small muted"> (manual)</span>}
+                      {r.priceInfo.price != null ? eurCell(r.priceEUR, r.priceInfo.price, r.currency) : '—'}
+                      {r.priceInfo.source === 'manual' && <span className="small muted">manual</span>}
                       {problems[r.id] && (
                         <div className="small warn-text" title={problems[r.id].detail}>
                           {problems[r.id].short}
@@ -384,9 +476,12 @@ export default function MyInvestments() {
                     <td className={'num ' + (r.priceInfo.changePct > 0 ? 'up' : r.priceInfo.changePct < 0 ? 'down' : '')}>
                       {pctFmt(r.priceInfo.changePct)}
                     </td>
-                    <td className="num">{r.value != null && r.shares ? cur(r.value, r.currency) : '—'}</td>
+                    <td className="num">{r.valueEUR != null && r.shares ? cur(r.valueEUR, 'EUR') : '—'}</td>
                     <td className={'num ' + (r.gain > 0 ? 'up' : r.gain < 0 ? 'down' : '')}>
                       {r.gainPct != null ? pctFmt(r.gainPct) : '—'}
+                      {r.gainEUR != null && (
+                        <div className="small muted">{r.gainEUR >= 0 ? '+' : ''}{cur(r.gainEUR, 'EUR', 0)}</div>
+                      )}
                     </td>
                     <td>
                       <button
@@ -429,7 +524,8 @@ export default function MyInvestments() {
                   {r.name}
                   {r.priceInfo.price != null && (
                     <span className="small secondary" style={{ marginLeft: 10, fontWeight: 400 }}>
-                      {cur(r.priceInfo.price, r.currency)}
+                      {cur(r.priceEUR, 'EUR')}
+                      {r.currency !== 'EUR' && <span className="muted"> ({cur(r.priceInfo.price, r.currency)})</span>}
                       {r.priceInfo.changePct != null && (
                         <span className={r.priceInfo.changePct >= 0 ? 'up' : 'down'}> {pctFmt(r.priceInfo.changePct)}</span>
                       )}
