@@ -29,27 +29,39 @@ import AnalystDock from '../components/AnalystDock.jsx'
 import { AllocationBars, PnLBars, PnLTiles, WealthChart } from '../components/PortfolioViz.jsx'
 import { askMentor, MENTOR_MODELS } from '../lib/mentor.js'
 import {
-  buildRealContext, clearRealCache, fetchRealData, getCachedRealData,
-  periodPnL, portfolioHistory, realSummary, requestSymbol,
+  buildRealContext, chartSymbol, clearRealCache, CURRENCIES, CURRENCY_SYMBOL,
+  fetchRealData, getCachedRealData, periodPnL, portfolioHistory, priceProblem,
+  proxyHint, realSummary, requestSymbol,
 } from '../lib/realportfolio.js'
+import { EXCHANGES, searchEuropean } from '../data/europeanMarkets.js'
 import { useStore } from '../lib/store.jsx'
 import {
-  IconCheck, IconMentor, IconPulse, IconRefresh, IconTrade, IconWarning, IconX,
+  IconCheck, IconMentor, IconPulse, IconRefresh, IconSearch, IconTrade, IconWarning, IconX,
 } from '../components/icons.jsx'
 
 const cur = (n, c = 'EUR', digits = 2) =>
-  n == null ? '—' : `${n.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })} ${c === 'EUR' ? '€' : '$'}`
+  n == null ? '—' : `${n.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })} ${CURRENCY_SYMBOL[c] || c}`
+// EUR headline with the native amount underneath when they differ.
+const eurCell = (eurValue, nativeValue, currency, digits = 2) => (
+  <>
+    {cur(eurValue, 'EUR', digits)}
+    {currency !== 'EUR' && nativeValue != null && (
+      <div className="small muted">{cur(nativeValue, currency, digits)}</div>
+    )}
+  </>
+)
 const pctFmt = (v) => (v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`)
 
 const EMPTY_FORM = {
   name: '', symbol: '', exchange: '', currency: 'EUR', type: 'stock',
-  shares: '', avgCost: '', manualPrice: '', monitored: true,
+  shares: '', avgCost: '', manualPrice: '', chartSymbol: '', monitored: true,
 }
 
 function InstrumentForm({ initial, onSave, onCancel }) {
   const [f, setF] = useState(initial)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const isPrivate = f.type === 'private'
+  const hint = proxyHint(f)
   return (
     <form
       className="invest-form"
@@ -61,6 +73,7 @@ function InstrumentForm({ initial, onSave, onCancel }) {
           name: f.name.trim(),
           symbol: isPrivate ? '' : f.symbol.trim().toUpperCase(),
           exchange: isPrivate ? '' : f.exchange.trim().toUpperCase(),
+          chartSymbol: f.chartSymbol.trim().toUpperCase(),
           shares: Math.max(0, parseFloat(f.shares) || 0),
           avgCost: Math.max(0, parseFloat(f.avgCost) || 0),
           manualPrice: Math.max(0, parseFloat(f.manualPrice) || 0),
@@ -88,10 +101,9 @@ function InstrumentForm({ initial, onSave, onCancel }) {
             <input value={f.exchange} onChange={set('exchange')} placeholder="e.g. XETR" />
           </label>
         )}
-        <label>Currency
+        <label>Currency <span className="muted">(as quoted)</span>
           <select value={f.currency} onChange={set('currency')}>
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
+            {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </label>
         <label>Shares you own
@@ -103,12 +115,79 @@ function InstrumentForm({ initial, onSave, onCancel }) {
         <label>Manual price <span className="muted">(fallback)</span>
           <input type="number" step="any" min="0" value={f.manualPrice} onChange={set('manualPrice')} placeholder="0.00" />
         </label>
+        {!isPrivate && (
+          <label>Chart proxy <span className="muted">(US symbol, chart only)</span>
+            <input value={f.chartSymbol} onChange={set('chartSymbol')} placeholder={hint ? hint.symbol : 'e.g. BMWYY'} />
+          </label>
+        )}
       </div>
+      {hint && !f.chartSymbol && (
+        <p className="small muted" style={{ margin: '8px 0 0' }}>
+          Suggested chart proxy for {f.symbol}: <button type="button" className="toggle-chip"
+            onClick={() => setF({ ...f, chartSymbol: hint.symbol })}>{hint.symbol}</button>{' '}
+          — {hint.what}. It only draws the chart; your value and P&amp;L always use the price above.
+        </p>
+      )}
       <div className="row" style={{ marginTop: 10 }}>
         <button type="submit" className="primary"><IconCheck size={14} /> Save</button>
         <button type="button" onClick={onCancel}><IconX size={14} /> Cancel</button>
       </div>
     </form>
+  )
+}
+
+function EuropeanPicker({ onPick, onClose }) {
+  const [q, setQ] = useState('')
+  const results = searchEuropean(q).slice(0, 40)
+  return (
+    <div className="card">
+      <div className="row spread" style={{ marginBottom: 8 }}>
+        <h3 style={{ margin: 0 }}>European markets</h3>
+        <button className="toggle-chip" onClick={onClose} aria-label="Close catalog"><IconX size={13} /></button>
+      </div>
+      <p className="small secondary" style={{ marginTop: 0 }}>
+        Major European listings with the exact symbol and exchange codes the data API expects — so
+        you never have to guess. Picking one fills in everything, including a US chart proxy.
+      </p>
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Search name, ticker, sector or exchange… (e.g. Siemens, ETF, XETR)"
+        style={{ width: '100%', maxWidth: 420, marginBottom: 10 }}
+        aria-label="Search European instruments"
+      />
+      <div className="table-wrap" style={{ maxHeight: 320, overflowY: 'auto' }}>
+        <table>
+          <thead>
+            <tr><th>Instrument</th><th>Symbol</th><th>Exchange</th><th>Currency</th><th></th></tr>
+          </thead>
+          <tbody>
+            {results.map((i) => (
+              <tr key={`${i.symbol}:${i.exchange}`}>
+                <td>
+                  {i.name}
+                  {i.type === 'etf' && <span className="pill neutral" style={{ marginLeft: 6 }}>ETF</span>}
+                  <div className="small muted">{i.sector}</div>
+                </td>
+                <td className="small muted">{i.symbol}</td>
+                <td className="small muted">{i.exchange}</td>
+                <td className="small muted">{i.currency}</td>
+                <td className="num"><button className="toggle-chip" onClick={() => onPick(i)}>Add</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {results.length === 0 && (
+        <p className="small muted">
+          Nothing matches "{q}" — add it by hand with <strong>+ Add instrument</strong>; any
+          symbol/exchange pair your data plan supports will work.
+        </p>
+      )}
+      <p className="small muted" style={{ marginBottom: 0 }}>
+        Exchanges covered: {EXCHANGES.map((e) => e.code).join(' · ')}
+      </p>
+    </div>
   )
 }
 
@@ -125,6 +204,7 @@ export default function MyInvestments() {
   const [reloadTick, setReloadTick] = useState(0)
   const [editingId, setEditingId] = useState(null) // instrument id | 'new' | null
   const [dockOpen, setDockOpen] = useState(true)
+  const [catalogOpen, setCatalogOpen] = useState(false)
   const [readBusy, setReadBusy] = useState(null) // instrument id being analysed
 
   const symbolsKey = instruments.map(requestSymbol).filter(Boolean).join(',')
@@ -144,11 +224,7 @@ export default function MyInvestments() {
         const result = await fetchRealData(twelveKey, instruments)
         if (cancelled) return
         setLiveData(result)
-        const nFail = Object.keys(result.failed).length
-        setLiveStatus({
-          phase: 'on',
-          message: nFail ? `Some symbols are not on your Twelve Data plan: ${Object.keys(result.failed).join(', ')} — set a manual price for those.` : 'Live prices loaded.',
-        })
+        setLiveStatus({ phase: 'on', message: 'Live prices updated.' })
       } catch (e) {
         if (cancelled) return
         setLiveData(null)
@@ -161,6 +237,15 @@ export default function MyInvestments() {
   }, [twelveKey, symbolsKey, reloadTick])
 
   const summary = useMemo(() => realSummary(instruments, liveData), [instruments, liveData])
+  const problems = useMemo(() => {
+    const out = {}
+    for (const inst of instruments) {
+      const p = priceProblem(inst, liveData)
+      if (p) out[inst.id] = p
+    }
+    return out
+  }, [instruments, liveData])
+  const problemIds = Object.keys(problems)
   const history = useMemo(() => portfolioHistory(instruments, liveData), [instruments, liveData])
   const pnl = useMemo(() => periodPnL(history), [history])
   const context = useMemo(() => buildRealContext(instruments, liveData, summary, pnl), [instruments, liveData, summary, pnl])
@@ -227,6 +312,9 @@ export default function MyInvestments() {
                 <IconRefresh size={14} /> Update data
               </button>
             )}
+            <button onClick={() => { setCatalogOpen(true); setEditingId(null) }}>
+              <IconSearch size={14} /> European markets
+            </button>
             <button className="primary" onClick={() => setEditingId('new')}>+ Add instrument</button>
           </div>
         </div>
@@ -247,9 +335,17 @@ export default function MyInvestments() {
             <IconWarning size={15} /><span>{liveStatus.message}</span>
           </div>
         )}
-        {liveStatus.phase === 'on' && liveStatus.message.includes('not on your') && (
+        {twelveKey && problemIds.length > 0 && (
           <div className="notice" style={{ marginTop: 14 }}>
-            <IconWarning size={15} /><span>{liveStatus.message}</span>
+            <IconWarning size={15} />
+            <span>
+              <strong>{problemIds.length} of {instruments.length} instruments have no live price.</strong>{' '}
+              Twelve Data's free plan covers US stocks, forex and crypto — European listings
+              (XETRA, LSE) need a paid plan, which is why {' '}
+              {instruments.filter((i) => problems[i.id] && i.exchange).map((i) => i.symbol).join(', ') || 'some symbols'}{' '}
+              come back empty while US tickers work. Each row below says exactly why, and offers a
+              manual price plus an optional US chart proxy.
+            </span>
           </div>
         )}
 
@@ -281,9 +377,10 @@ export default function MyInvestments() {
             <PnLTiles pnl={pnl} />
             <WealthChart history={history} costEUR={summary.costEUR} />
             <p className="small muted" style={{ margin: '8px 0 0' }}>
-              EUR value of your current holdings evaluated over the past year (today's share
-              counts throughout; USD converted through the daily EUR/USD rate; manual-priced
-              positions included as a constant). The dashed line is what those positions cost you.
+              EUR value of your current holdings evaluated over the past year — today's share
+              counts throughout, every non-euro position converted through its own daily EUR rate,
+              manual-priced positions included as a constant. The dashed line is what those
+              positions cost you, so the gap between line and curve is your gain or loss.
             </p>
           </div>
         )}
@@ -301,13 +398,29 @@ export default function MyInvestments() {
           </div>
         )}
 
+        {catalogOpen && (
+          <EuropeanPicker
+            onClose={() => setCatalogOpen(false)}
+            onPick={(i) => {
+              const id = `${i.symbol}-${i.exchange}`.toLowerCase() + '-' + Date.now().toString(36)
+              addInstrument({
+                id, name: i.name, symbol: i.symbol, exchange: i.exchange,
+                currency: i.currency, type: i.type, shares: 0, avgCost: 0,
+                manualPrice: 0, chartSymbol: i.proxy || '', monitored: true,
+              })
+              setCatalogOpen(false)
+            }}
+          />
+        )}
+
         {editingId && (
           <div className="card">
             <h3 style={{ marginTop: 0 }}>{editingId === 'new' ? 'Add an instrument' : `Edit ${editing?.name}`}</h3>
             <InstrumentForm
               initial={editingId === 'new' ? EMPTY_FORM : {
                 ...EMPTY_FORM, ...editing,
-                shares: editing.shares || '', avgCost: editing.avgCost || '', manualPrice: editing.manualPrice || '',
+                shares: editing.shares || '', avgCost: editing.avgCost || '',
+                manualPrice: editing.manualPrice || '', chartSymbol: editing.chartSymbol || '',
               }}
               onSave={saveInstrument}
               onCancel={() => setEditingId(null)}
@@ -321,6 +434,13 @@ export default function MyInvestments() {
             Set your share counts with <strong>Edit</strong> (they start at zero). <strong>Monitor</strong> chooses
             which instruments get charts and analyst reads below.
           </p>
+          {summary.rates && Object.keys(summary.rates).length > 0 && (
+            <p className="small muted" style={{ marginTop: 0 }}>
+              Everything is shown in euro. Rates used:{' '}
+              {Object.entries(summary.rates).map(([c, r]) => `1 € = ${r.toFixed(4)} ${c}`).join(' · ')}
+              {' '}(live daily rates; the native quote is shown underneath each converted figure).
+            </p>
+          )}
           <div className="table-wrap">
             <table>
               <thead>
@@ -328,7 +448,7 @@ export default function MyInvestments() {
                   <th>Instrument</th><th>Symbol</th>
                   <th className="num">Shares</th><th className="num">Avg cost</th>
                   <th className="num">Price</th><th className="num">Today</th>
-                  <th className="num">Value</th><th className="num">P&amp;L</th>
+                  <th className="num">Value €</th><th className="num">P&amp;L</th>
                   <th>Monitor</th><th></th>
                 </tr>
               </thead>
@@ -343,17 +463,25 @@ export default function MyInvestments() {
                     </td>
                     <td className="small muted">{r.symbol ? `${r.symbol}${r.exchange ? ':' + r.exchange : ''}` : '—'}</td>
                     <td className="num">{r.shares || '—'}</td>
-                    <td className="num">{r.avgCost ? cur(r.avgCost, r.currency) : '—'}</td>
+                    <td className="num">{r.avgCost ? eurCell(r.avgCostEUR, r.avgCost, r.currency) : '—'}</td>
                     <td className="num">
-                      {r.priceInfo.price != null ? cur(r.priceInfo.price, r.currency) : '—'}
-                      {r.priceInfo.source === 'manual' && <span className="small muted"> (manual)</span>}
+                      {r.priceInfo.price != null ? eurCell(r.priceEUR, r.priceInfo.price, r.currency) : '—'}
+                      {r.priceInfo.source === 'manual' && <span className="small muted">manual</span>}
+                      {problems[r.id] && (
+                        <div className="small warn-text" title={problems[r.id].detail}>
+                          {problems[r.id].short}
+                        </div>
+                      )}
                     </td>
                     <td className={'num ' + (r.priceInfo.changePct > 0 ? 'up' : r.priceInfo.changePct < 0 ? 'down' : '')}>
                       {pctFmt(r.priceInfo.changePct)}
                     </td>
-                    <td className="num">{r.value != null && r.shares ? cur(r.value, r.currency) : '—'}</td>
+                    <td className="num">{r.valueEUR != null && r.shares ? cur(r.valueEUR, 'EUR') : '—'}</td>
                     <td className={'num ' + (r.gain > 0 ? 'up' : r.gain < 0 ? 'down' : '')}>
                       {r.gainPct != null ? pctFmt(r.gainPct) : '—'}
+                      {r.gainEUR != null && (
+                        <div className="small muted">{r.gainEUR >= 0 ? '+' : ''}{cur(r.gainEUR, 'EUR', 0)}</div>
+                      )}
                     </td>
                     <td>
                       <button
@@ -383,7 +511,11 @@ export default function MyInvestments() {
 
         {monitored.map((r) => {
           const sym = requestSymbol(r)
-          const series = sym && liveData?.data?.[sym]
+          const own = sym && liveData?.data?.[sym]
+          const proxySym = chartSymbol(r)
+          const proxy = !own && proxySym ? liveData?.data?.[proxySym] : null
+          const series = own || proxy
+          const problem = problems[r.id]
           const read = reads[r.id]
           return (
             <div className="card" key={r.id}>
@@ -392,7 +524,8 @@ export default function MyInvestments() {
                   {r.name}
                   {r.priceInfo.price != null && (
                     <span className="small secondary" style={{ marginLeft: 10, fontWeight: 400 }}>
-                      {cur(r.priceInfo.price, r.currency)}
+                      {cur(r.priceEUR, 'EUR')}
+                      {r.currency !== 'EUR' && <span className="muted"> ({cur(r.priceInfo.price, r.currency)})</span>}
                       {r.priceInfo.changePct != null && (
                         <span className={r.priceInfo.changePct >= 0 ? 'up' : 'down'}> {pctFmt(r.priceInfo.changePct)}</span>
                       )}
@@ -407,15 +540,39 @@ export default function MyInvestments() {
               </div>
 
               {series ? (
-                <div style={{ marginTop: 12 }}><LiveChart series={series} currency={r.currency} /></div>
+                <div style={{ marginTop: 12 }}>
+                  {proxy && (
+                    <p className="small warn-text" style={{ margin: '0 0 8px' }}>
+                      <IconWarning size={13} /> Chart shows <strong>{proxySym}</strong> as a proxy —
+                      your own listing is not on your data plan. Shape and trend are indicative;
+                      the price level and currency are not your holding's, and your value and P&amp;L
+                      above use the manual price instead.
+                    </p>
+                  )}
+                  <LiveChart series={series} currency={proxy ? 'proxy units' : r.currency} />
+                </div>
               ) : (
-                <p className="small muted" style={{ marginTop: 10 }}>
-                  {r.type === 'private'
-                    ? 'Private company — no public price chart exists. Set a manual price to include it in your totals.'
-                    : twelveKey
-                      ? 'No chart data for this symbol on your Twelve Data plan. Set a manual price in Edit, or switch the symbol to a US listing.'
-                      : 'Add a Twelve Data key in Settings to chart this instrument.'}
-                </p>
+                <div className="empty-chart">
+                  <p className="small" style={{ margin: 0 }}>
+                    <strong>{problem?.short || 'No chart data'}</strong>
+                  </p>
+                  <p className="small secondary" style={{ margin: '6px 0 10px' }}>
+                    {problem?.detail || 'Add a Twelve Data key in Settings to chart this instrument.'}
+                  </p>
+                  <div className="row" style={{ gap: 8 }}>
+                    <button className="toggle-chip" onClick={() => setEditingId(r.id)}>
+                      Set manual price
+                    </button>
+                    {problem?.canProxy && proxyHint(r) && !r.chartSymbol && (
+                      <button
+                        className="toggle-chip"
+                        onClick={() => updateInstrument(r.id, { chartSymbol: proxyHint(r).symbol })}
+                      >
+                        Use {proxyHint(r).symbol} as chart proxy
+                      </button>
+                    )}
+                  </div>
+                </div>
               )}
 
               {read && (

@@ -100,6 +100,92 @@ function MentorSettings() {
   )
 }
 
+// Probes the user's own key with one US symbol, one Xetra symbol and one FX
+// pair, and reports exactly what their plan returns. This is the honest way
+// to answer "why is my European stock empty?" — the app cannot know a plan's
+// entitlements without asking.
+function CoverageCheck({ apiKey }) {
+  const [result, setResult] = useState(null)
+  const [busy, setBusy] = useState(false)
+
+  async function run() {
+    if (!apiKey || busy) return
+    setBusy(true)
+    setResult(null)
+    const probes = [
+      { label: 'US stocks', symbol: 'AAPL' },
+      { label: 'Xetra (Germany)', symbol: 'BMW:XETR' },
+      { label: 'London', symbol: 'SHEL:LSE' },
+      { label: 'Forex (EUR/USD)', symbol: 'EUR/USD' },
+    ]
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(probes.map((p) => p.symbol).join(','))}&interval=1day&outputsize=2&apikey=${encodeURIComponent(apiKey)}`
+      const res = await fetch(url)
+      const body = await res.json()
+      if (body.status === 'error') {
+        setResult({ error: body.message || 'The API rejected the request.' })
+      } else {
+        setResult({
+          rows: probes.map((p) => {
+            const entry = body[p.symbol] ?? body
+            const ok = Array.isArray(entry?.values) && entry.values.length > 0
+            return { ...p, ok, message: ok ? 'available' : (entry?.message || 'no data returned') }
+          }),
+        })
+      }
+    } catch {
+      setResult({ error: 'Could not reach Twelve Data (connection blocked or offline).' })
+    }
+    setBusy(false)
+  }
+
+  return (
+    <>
+      <h3>What does my key actually cover?</h3>
+      <p className="small secondary" style={{ marginTop: 0 }}>
+        Plans differ, so the app asks your key directly: it requests one US symbol, one Xetra
+        symbol, one London symbol and one currency pair, and reports what comes back. Costs 4 API
+        credits.
+      </p>
+      <button onClick={run} disabled={!apiKey || busy}>
+        {busy ? 'Checking…' : 'Check my data coverage'}
+      </button>
+      {result?.error && <p className="small down" style={{ marginTop: 8 }}><IconWarning size={13} /> {result.error}</p>}
+      {result?.rows && (
+        <>
+          <div className="table-wrap" style={{ marginTop: 10 }}>
+            <table>
+              <thead><tr><th>Market</th><th>Probe</th><th>Result</th></tr></thead>
+              <tbody>
+                {result.rows.map((r) => (
+                  <tr key={r.symbol}>
+                    <td>{r.label}</td>
+                    <td className="small muted">{r.symbol}</td>
+                    <td>
+                      <span className={'pill ' + (r.ok ? 'good-bg' : 'crit-bg')}>{r.ok ? 'available' : 'not available'}</span>
+                      {!r.ok && <div className="small muted">{r.message}</div>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {result.rows.some((r) => !r.ok && r.symbol.includes(':')) && (
+            <p className="small secondary" style={{ marginTop: 8 }}>
+              European exchanges are not included in your current plan. You have three options:
+              keep <strong>manual prices</strong> for those holdings (totals and P&amp;L stay exact,
+              charts come from the US proxy), switch those positions to their{' '}
+              <strong>US listings/ADRs</strong> where one exists, or upgrade to a Twelve Data plan
+              that includes international exchanges (from about $29/month). Nothing in the app
+              breaks either way — every row tells you which prices are live and which are manual.
+            </p>
+          )}
+        </>
+      )}
+    </>
+  )
+}
+
 export default function Settings() {
   const { state, liveStatus, updateSettings, refreshLiveData } = useStore()
   const [keyInput, setKeyInput] = useState(state.settings.apiKey)
@@ -167,6 +253,8 @@ export default function Settings() {
           <IconLock size={13} /> Your key is stored only in this browser (localStorage) and sent only to Twelve Data.
           It never touches any other server. Don't use a paid key on a shared computer.
         </p>
+
+        <CoverageCheck apiKey={state.settings.apiKey} />
 
         <h3>3. Turn on live data</h3>
         <div className="row">

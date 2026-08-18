@@ -38,7 +38,23 @@ export const SEED_INSTRUMENTS = [
   { id: 'vw', name: 'Volkswagen (Vz.)', symbol: 'VOW3', exchange: 'XETR', currency: 'EUR', type: 'stock', shares: 0, avgCost: 0, manualPrice: 0, monitored: true },
 ]
 
-const CACHE_KEY = 'lti-real-cache-v1'
+const CACHE_KEY = 'lti-real-cache-v2'
+
+// Currencies the tracker can convert into EUR. Forex is on Twelve Data's
+// free plan, so these pairs cost credits but never plan errors.
+export const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'SEK', 'DKK', 'NOK', 'PLN']
+export const CURRENCY_SYMBOL = {
+  EUR: '€', USD: '$', GBP: '£', CHF: 'CHF', SEK: 'kr', DKK: 'kr', NOK: 'kr', PLN: 'zł',
+}
+const fxPair = (c) => `EUR/${c}`
+
+// EUR value of an amount in `currency`. rates maps currency -> units per EUR.
+export function toEUR(amount, currency, rates) {
+  if (amount == null) return null
+  if (currency === 'EUR') return amount
+  const r = rates?.[currency]
+  return r ? amount / r : null
+}
 
 function todayStamp() {
   return new Date().toISOString().slice(0, 10)
@@ -49,6 +65,34 @@ function todayStamp() {
 export function requestSymbol(inst) {
   if (!inst.symbol) return null
   return inst.exchange ? `${inst.symbol}:${inst.exchange}` : inst.symbol
+}
+
+// A US-listed stand-in used ONLY to draw a chart when the real listing is
+// not on the user's data plan. It never touches valuation: an ADR trades in
+// another currency at another ratio, so using it for position value would be
+// simply wrong. Charts drawn from it are labelled as proxies.
+export function chartSymbol(inst) {
+  return inst.chartSymbol ? inst.chartSymbol.trim().toUpperCase() : null
+}
+
+// Well-known US-listed stand-ins for European listings, offered as hints in
+// the edit form. Similar exposure — never the same instrument.
+export const PROXY_HINTS = {
+  BMW: { symbol: 'BMWYY', what: 'BMW ADR (US OTC)' },
+  MBG: { symbol: 'MBGYY', what: 'Mercedes-Benz ADR (US OTC)' },
+  VOW3: { symbol: 'VWAGY', what: 'Volkswagen ADR (US OTC)' },
+  EUNL: { symbol: 'URTH', what: 'iShares MSCI World (US listing)' },
+  IWDA: { symbol: 'URTH', what: 'iShares MSCI World (US listing)' },
+  AIAI: { symbol: 'AIQ', what: 'Global X AI & Technology ETF — similar theme' },
+  SAP: { symbol: 'SAP', what: 'SAP NYSE listing' },
+  SIE: { symbol: 'SIEGY', what: 'Siemens ADR (US OTC)' },
+  ALV: { symbol: 'ALIZY', what: 'Allianz ADR (US OTC)' },
+  AIR: { symbol: 'EADSY', what: 'Airbus ADR (US OTC)' },
+  ASML: { symbol: 'ASML', what: 'ASML Nasdaq listing' },
+}
+
+export function proxyHint(inst) {
+  return inst.symbol ? PROXY_HINTS[inst.symbol.toUpperCase()] || null : null
 }
 
 function parseSeries(body) {
@@ -71,13 +115,13 @@ export function getCachedRealData() {
     if (!raw) return null
     const key = raw.length + raw.slice(0, 40)
     if (cacheMemo.key === key) return cacheMemo.value
-    const { stamp, data, failed, fx } = JSON.parse(raw)
+    const { stamp, data, failed, fx, rates } = JSON.parse(raw)
     if (stamp !== todayStamp()) return null
     const out = {}
     for (const [sym, rows] of Object.entries(data)) {
       out[sym] = rows.map((r) => ({ ...r, date: new Date(r.date) }))
     }
-    const value = { data: out, failed: failed || {}, fx: fx || null }
+    const value = { data: out, failed: failed || {}, fx: fx || null, rates: rates || (fx ? { USD: fx } : {}) }
     cacheMemo = { key, value }
     return value
   } catch {
@@ -93,8 +137,14 @@ export function clearRealCache() {
 // Returns { data: {reqSym: candles[]}, failed: {reqSym: message}, fx: rate|null }.
 // Per-symbol failures (plan limits, unknown symbols) are collected, not fatal.
 export async function fetchRealData(apiKey, instruments) {
-  const syms = [...new Set(instruments.map(requestSymbol).filter(Boolean))]
-  const all = [...syms, 'EUR/USD']
+  const syms = [...new Set([
+    ...instruments.map(requestSymbol),
+    ...instruments.map(chartSymbol),
+  ].filter(Boolean))]
+  // one FX pair per non-EUR currency actually in use
+  const needed = [...new Set(instruments.map((i) => i.currency).filter((c) => c && c !== 'EUR'))]
+  const fxSyms = needed.map(fxPair)
+  const all = [...syms, ...fxSyms]
   const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(all.join(','))}&interval=1day&outputsize=400&apikey=${encodeURIComponent(apiKey)}`
 
   let res
@@ -106,7 +156,13 @@ export async function fetchRealData(apiKey, instruments) {
   if (!res.ok) throw new Error(`Twelve Data returned HTTP ${res.status}.`)
   const body = await res.json()
   if (body.status === 'error') {
-    throw new Error(body.message || 'The API rejected the request — check your API key in Settings.')
+    const msg = body.message || ''
+    if (/credit|limit|429/i.test(msg)) {
+      throw new Error(
+        `Twelve Data rate limit reached: ${msg} Each symbol costs one API credit and the free plan allows 8 per minute — wait a minute, then press Update data again.`
+      )
+    }
+    throw new Error(msg || 'The API rejected the request — check your API key in Settings.')
   }
 
   // A single-symbol request returns a flat object; batches key by symbol.
@@ -119,15 +175,22 @@ export async function fetchRealData(apiKey, instruments) {
     if (series && series.length >= 20) data[sym] = series
     else failed[sym] = bySym[sym]?.message || 'No data returned for this symbol.'
   }
-  const fxSeries = parseSeries(bySym['EUR/USD'])
-  const fx = fxSeries?.length ? fxSeries[fxSeries.length - 1].close : null
-  if (fxSeries?.length) data['EUR/USD'] = fxSeries
+  const rates = {}
+  for (const c of needed) {
+    const rows = parseSeries(bySym[fxPair(c)])
+    if (rows?.length) {
+      data[fxPair(c)] = rows
+      rates[c] = rows[rows.length - 1].close
+    }
+  }
+  const fx = rates.USD ?? null
 
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({
       stamp: todayStamp(),
       failed,
       fx,
+      rates,
       data: Object.fromEntries(Object.entries(data).map(([sym, rows]) => [
         sym, rows.map((r) => ({ ...r, date: r.date.toISOString() })),
       ])),
@@ -136,7 +199,7 @@ export async function fetchRealData(apiKey, instruments) {
   cacheMemo = { key: '', value: null }
   try { window.dispatchEvent(new Event('lti-real-updated')) } catch { /* SSR/tests */ }
 
-  return { data, failed, fx }
+  return { data, failed, fx, rates }
 }
 
 // Best-known price for an instrument: live close when we have a series,
@@ -157,18 +220,43 @@ export function instrumentPrice(inst, liveData) {
   return { price: null, changePct: null, source: 'none' }
 }
 
-// EUR value of one instrument position (USD converted via EUR/USD rate).
-function positionValueEUR(inst, priceInfo, fx) {
+// Why a row has no live price, in the user's words, using the API's own
+// message when there is one. Returns null when the price is fine.
+export function priceProblem(inst, liveData) {
+  if (inst.type === 'private') {
+    return inst.manualPrice > 0 ? null : {
+      short: 'Private company',
+      detail: 'Not listed on any exchange, so no price feed exists. Enter a manual price (for example your last known valuation per share) to include it in your totals.',
+    }
+  }
+  if (!inst.symbol) {
+    return { short: 'No symbol set', detail: 'Add the ticker in Edit, or set a manual price.' }
+  }
+  const sym = requestSymbol(inst)
+  if (liveData?.data?.[sym]?.length) return null
+  const apiMessage = liveData?.failed?.[sym]
+  if (!liveData) {
+    return { short: 'No market-data key', detail: 'Add a Twelve Data key in Settings, or set a manual price.' }
+  }
+  const international = Boolean(inst.exchange)
+  return {
+    short: international ? `${inst.exchange} not on your plan` : 'Symbol not returned',
+    detail: (apiMessage ? `The API said: “${apiMessage}” ` : '') + (international
+      ? 'Twelve Data\'s free plan covers US stocks, forex and crypto; European listings such as XETRA and LSE need a paid plan (a handful of trial symbols are the exception, which is why one or two may work). Set a manual price to keep your totals right, and optionally add a US-listed chart proxy so you still get a chart.'
+      : 'Check the ticker spelling, or set a manual price.'),
+    canProxy: true,
+  }
+}
+
+// EUR value of one instrument position, via the FX rates table.
+function positionValueEUR(inst, priceInfo, rates) {
   if (priceInfo.price == null || !inst.shares) return null
-  const native = priceInfo.price * inst.shares
-  if (inst.currency === 'EUR') return native
-  if (inst.currency === 'USD' && fx) return native / fx
-  return null
+  return toEUR(priceInfo.price * inst.shares, inst.currency, rates)
 }
 
 // Summarises the whole real portfolio at current prices.
 export function realSummary(instruments, liveData) {
-  const fx = liveData?.fx || null
+  const rates = liveData?.rates || (liveData?.fx ? { USD: liveData.fx } : {})
   let valueEUR = 0
   let costEUR = 0
   let priced = 0
@@ -176,22 +264,26 @@ export function realSummary(instruments, liveData) {
   const rows = instruments.map((inst) => {
     const p = instrumentPrice(inst, liveData)
     const value = p.price != null ? p.price * inst.shares : null
-    const vEUR = positionValueEUR(inst, p, fx)
+    const vEUR = positionValueEUR(inst, p, rates)
     const cost = inst.avgCost * inst.shares
-    const cEUR = inst.currency === 'EUR' ? cost : (fx ? cost / fx : null)
+    const cEUR = toEUR(cost, inst.currency, rates)
     if (vEUR != null && inst.shares > 0) { valueEUR += vEUR; priced++ } else if (inst.shares > 0) { unpriced++ }
     if (cEUR != null && inst.shares > 0) costEUR += cEUR
     return {
       ...inst,
       priceInfo: p,
+      priceEUR: toEUR(p.price, inst.currency, rates),
+      avgCostEUR: toEUR(inst.avgCost, inst.currency, rates),
       value,
       valueEUR: vEUR,
       cost,
+      costEUR: cEUR,
       gain: value != null && cost > 0 ? value - cost : null,
+      gainEUR: vEUR != null && cEUR > 0 ? vEUR - cEUR : null,
       gainPct: value != null && cost > 0 ? ((value - cost) / cost) * 100 : null,
     }
   })
-  return { rows, valueEUR, costEUR, gainEUR: valueEUR - costEUR, priced, unpriced, fx }
+  return { rows, valueEUR, costEUR, gainEUR: valueEUR - costEUR, priced, unpriced, rates, fx: rates.USD ?? null }
 }
 
 // Compact context block so the analyst chat and the per-position reads see
@@ -246,9 +338,13 @@ export function buildRealContext(instruments, liveData, summary, pnl) {
 export function portfolioHistory(instruments, liveData) {
   const owned = instruments.filter((i) => i.shares > 0)
   if (!owned.length || !liveData?.data) return []
-  const fxRows = liveData.data['EUR/USD'] || []
-  const fxMap = new Map(fxRows.map((r) => [r.date.toISOString().slice(0, 10), r.close]))
-  const latestFx = liveData.fx || (fxRows.length ? fxRows[fxRows.length - 1].close : null)
+  const rates = liveData.rates || (liveData.fx ? { USD: liveData.fx } : {})
+  // daily rate lookup per currency, so history is currency-correct
+  const fxMaps = {}
+  for (const c of CURRENCIES) {
+    const rows = liveData.data[fxPair(c)]
+    if (rows?.length) fxMaps[c] = new Map(rows.map((r) => [r.date.toISOString().slice(0, 10), r.close]))
+  }
 
   const live = []
   let manualEUR = 0
@@ -261,27 +357,27 @@ export function portfolioHistory(instruments, liveData) {
       live.push({ inst, map, first: rows[0].close })
       for (const k of map.keys()) dates.add(k)
     } else if (inst.manualPrice > 0) {
-      const native = inst.manualPrice * inst.shares
-      manualEUR += inst.currency === 'USD' ? (latestFx ? native / latestFx : 0) : native
+      manualEUR += toEUR(inst.manualPrice * inst.shares, inst.currency, rates) || 0
     }
   }
   if (!live.length) return []
 
   const sorted = [...dates].sort().slice(-400)
   const lastClose = new Map()
-  let lastFx = fxRows.length ? fxRows[0].close : latestFx
+  const lastRate = { ...rates }
   const out = []
   for (const day of sorted) {
-    if (fxMap.has(day)) lastFx = fxMap.get(day)
+    for (const [c, map] of Object.entries(fxMaps)) {
+      if (map.has(day)) lastRate[c] = map.get(day)
+    }
     let total = manualEUR
     let complete = true
     for (const { inst, map, first } of live) {
       if (map.has(day)) lastClose.set(inst.id, map.get(day))
       const close = lastClose.get(inst.id) ?? first
-      const native = close * inst.shares
-      if (inst.currency === 'EUR') total += native
-      else if (lastFx) total += native / lastFx
-      else complete = false
+      const eur = toEUR(close * inst.shares, inst.currency, lastRate)
+      if (eur == null) complete = false
+      else total += eur
     }
     if (complete) out.push({ date: new Date(day + 'T00:00:00Z'), value: total })
   }
