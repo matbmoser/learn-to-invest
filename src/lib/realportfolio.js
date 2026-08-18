@@ -51,6 +51,34 @@ export function requestSymbol(inst) {
   return inst.exchange ? `${inst.symbol}:${inst.exchange}` : inst.symbol
 }
 
+// A US-listed stand-in used ONLY to draw a chart when the real listing is
+// not on the user's data plan. It never touches valuation: an ADR trades in
+// another currency at another ratio, so using it for position value would be
+// simply wrong. Charts drawn from it are labelled as proxies.
+export function chartSymbol(inst) {
+  return inst.chartSymbol ? inst.chartSymbol.trim().toUpperCase() : null
+}
+
+// Well-known US-listed stand-ins for European listings, offered as hints in
+// the edit form. Similar exposure — never the same instrument.
+export const PROXY_HINTS = {
+  BMW: { symbol: 'BMWYY', what: 'BMW ADR (US OTC)' },
+  MBG: { symbol: 'MBGYY', what: 'Mercedes-Benz ADR (US OTC)' },
+  VOW3: { symbol: 'VWAGY', what: 'Volkswagen ADR (US OTC)' },
+  EUNL: { symbol: 'URTH', what: 'iShares MSCI World (US listing)' },
+  IWDA: { symbol: 'URTH', what: 'iShares MSCI World (US listing)' },
+  AIAI: { symbol: 'AIQ', what: 'Global X AI & Technology ETF — similar theme' },
+  SAP: { symbol: 'SAP', what: 'SAP NYSE listing' },
+  SIE: { symbol: 'SIEGY', what: 'Siemens ADR (US OTC)' },
+  ALV: { symbol: 'ALIZY', what: 'Allianz ADR (US OTC)' },
+  AIR: { symbol: 'EADSY', what: 'Airbus ADR (US OTC)' },
+  ASML: { symbol: 'ASML', what: 'ASML Nasdaq listing' },
+}
+
+export function proxyHint(inst) {
+  return inst.symbol ? PROXY_HINTS[inst.symbol.toUpperCase()] || null : null
+}
+
 function parseSeries(body) {
   if (!body || body.status === 'error' || !Array.isArray(body.values)) return null
   return body.values
@@ -93,7 +121,10 @@ export function clearRealCache() {
 // Returns { data: {reqSym: candles[]}, failed: {reqSym: message}, fx: rate|null }.
 // Per-symbol failures (plan limits, unknown symbols) are collected, not fatal.
 export async function fetchRealData(apiKey, instruments) {
-  const syms = [...new Set(instruments.map(requestSymbol).filter(Boolean))]
+  const syms = [...new Set([
+    ...instruments.map(requestSymbol),
+    ...instruments.map(chartSymbol),
+  ].filter(Boolean))]
   const all = [...syms, 'EUR/USD']
   const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(all.join(','))}&interval=1day&outputsize=400&apikey=${encodeURIComponent(apiKey)}`
 
@@ -106,7 +137,13 @@ export async function fetchRealData(apiKey, instruments) {
   if (!res.ok) throw new Error(`Twelve Data returned HTTP ${res.status}.`)
   const body = await res.json()
   if (body.status === 'error') {
-    throw new Error(body.message || 'The API rejected the request — check your API key in Settings.')
+    const msg = body.message || ''
+    if (/credit|limit|429/i.test(msg)) {
+      throw new Error(
+        `Twelve Data rate limit reached: ${msg} Each symbol costs one API credit and the free plan allows 8 per minute — wait a minute, then press Update data again.`
+      )
+    }
+    throw new Error(msg || 'The API rejected the request — check your API key in Settings.')
   }
 
   // A single-symbol request returns a flat object; batches key by symbol.
@@ -155,6 +192,34 @@ export function instrumentPrice(inst, liveData) {
   }
   if (inst.manualPrice > 0) return { price: inst.manualPrice, changePct: null, source: 'manual' }
   return { price: null, changePct: null, source: 'none' }
+}
+
+// Why a row has no live price, in the user's words, using the API's own
+// message when there is one. Returns null when the price is fine.
+export function priceProblem(inst, liveData) {
+  if (inst.type === 'private') {
+    return inst.manualPrice > 0 ? null : {
+      short: 'Private company',
+      detail: 'Not listed on any exchange, so no price feed exists. Enter a manual price (for example your last known valuation per share) to include it in your totals.',
+    }
+  }
+  if (!inst.symbol) {
+    return { short: 'No symbol set', detail: 'Add the ticker in Edit, or set a manual price.' }
+  }
+  const sym = requestSymbol(inst)
+  if (liveData?.data?.[sym]?.length) return null
+  const apiMessage = liveData?.failed?.[sym]
+  if (!liveData) {
+    return { short: 'No market-data key', detail: 'Add a Twelve Data key in Settings, or set a manual price.' }
+  }
+  const international = Boolean(inst.exchange)
+  return {
+    short: international ? `${inst.exchange} not on your plan` : 'Symbol not returned',
+    detail: (apiMessage ? `The API said: “${apiMessage}” ` : '') + (international
+      ? 'Twelve Data\'s free plan covers US stocks, forex and crypto; European listings such as XETRA and LSE need a paid plan (a handful of trial symbols are the exception, which is why one or two may work). Set a manual price to keep your totals right, and optionally add a US-listed chart proxy so you still get a chart.'
+      : 'Check the ticker spelling, or set a manual price.'),
+    canProxy: true,
+  }
 }
 
 // EUR value of one instrument position (USD converted via EUR/USD rate).

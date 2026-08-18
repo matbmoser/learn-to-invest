@@ -29,8 +29,8 @@ import AnalystDock from '../components/AnalystDock.jsx'
 import { AllocationBars, PnLBars, PnLTiles, WealthChart } from '../components/PortfolioViz.jsx'
 import { askMentor, MENTOR_MODELS } from '../lib/mentor.js'
 import {
-  buildRealContext, clearRealCache, fetchRealData, getCachedRealData,
-  periodPnL, portfolioHistory, realSummary, requestSymbol,
+  buildRealContext, chartSymbol, clearRealCache, fetchRealData, getCachedRealData,
+  periodPnL, portfolioHistory, priceProblem, proxyHint, realSummary, requestSymbol,
 } from '../lib/realportfolio.js'
 import { useStore } from '../lib/store.jsx'
 import {
@@ -43,13 +43,14 @@ const pctFmt = (v) => (v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%
 
 const EMPTY_FORM = {
   name: '', symbol: '', exchange: '', currency: 'EUR', type: 'stock',
-  shares: '', avgCost: '', manualPrice: '', monitored: true,
+  shares: '', avgCost: '', manualPrice: '', chartSymbol: '', monitored: true,
 }
 
 function InstrumentForm({ initial, onSave, onCancel }) {
   const [f, setF] = useState(initial)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const isPrivate = f.type === 'private'
+  const hint = proxyHint(f)
   return (
     <form
       className="invest-form"
@@ -61,6 +62,7 @@ function InstrumentForm({ initial, onSave, onCancel }) {
           name: f.name.trim(),
           symbol: isPrivate ? '' : f.symbol.trim().toUpperCase(),
           exchange: isPrivate ? '' : f.exchange.trim().toUpperCase(),
+          chartSymbol: f.chartSymbol.trim().toUpperCase(),
           shares: Math.max(0, parseFloat(f.shares) || 0),
           avgCost: Math.max(0, parseFloat(f.avgCost) || 0),
           manualPrice: Math.max(0, parseFloat(f.manualPrice) || 0),
@@ -103,7 +105,19 @@ function InstrumentForm({ initial, onSave, onCancel }) {
         <label>Manual price <span className="muted">(fallback)</span>
           <input type="number" step="any" min="0" value={f.manualPrice} onChange={set('manualPrice')} placeholder="0.00" />
         </label>
+        {!isPrivate && (
+          <label>Chart proxy <span className="muted">(US symbol, chart only)</span>
+            <input value={f.chartSymbol} onChange={set('chartSymbol')} placeholder={hint ? hint.symbol : 'e.g. BMWYY'} />
+          </label>
+        )}
       </div>
+      {hint && !f.chartSymbol && (
+        <p className="small muted" style={{ margin: '8px 0 0' }}>
+          Suggested chart proxy for {f.symbol}: <button type="button" className="toggle-chip"
+            onClick={() => setF({ ...f, chartSymbol: hint.symbol })}>{hint.symbol}</button>{' '}
+          — {hint.what}. It only draws the chart; your value and P&amp;L always use the price above.
+        </p>
+      )}
       <div className="row" style={{ marginTop: 10 }}>
         <button type="submit" className="primary"><IconCheck size={14} /> Save</button>
         <button type="button" onClick={onCancel}><IconX size={14} /> Cancel</button>
@@ -144,11 +158,7 @@ export default function MyInvestments() {
         const result = await fetchRealData(twelveKey, instruments)
         if (cancelled) return
         setLiveData(result)
-        const nFail = Object.keys(result.failed).length
-        setLiveStatus({
-          phase: 'on',
-          message: nFail ? `Some symbols are not on your Twelve Data plan: ${Object.keys(result.failed).join(', ')} — set a manual price for those.` : 'Live prices loaded.',
-        })
+        setLiveStatus({ phase: 'on', message: 'Live prices updated.' })
       } catch (e) {
         if (cancelled) return
         setLiveData(null)
@@ -161,6 +171,15 @@ export default function MyInvestments() {
   }, [twelveKey, symbolsKey, reloadTick])
 
   const summary = useMemo(() => realSummary(instruments, liveData), [instruments, liveData])
+  const problems = useMemo(() => {
+    const out = {}
+    for (const inst of instruments) {
+      const p = priceProblem(inst, liveData)
+      if (p) out[inst.id] = p
+    }
+    return out
+  }, [instruments, liveData])
+  const problemIds = Object.keys(problems)
   const history = useMemo(() => portfolioHistory(instruments, liveData), [instruments, liveData])
   const pnl = useMemo(() => periodPnL(history), [history])
   const context = useMemo(() => buildRealContext(instruments, liveData, summary, pnl), [instruments, liveData, summary, pnl])
@@ -247,9 +266,17 @@ export default function MyInvestments() {
             <IconWarning size={15} /><span>{liveStatus.message}</span>
           </div>
         )}
-        {liveStatus.phase === 'on' && liveStatus.message.includes('not on your') && (
+        {twelveKey && problemIds.length > 0 && (
           <div className="notice" style={{ marginTop: 14 }}>
-            <IconWarning size={15} /><span>{liveStatus.message}</span>
+            <IconWarning size={15} />
+            <span>
+              <strong>{problemIds.length} of {instruments.length} instruments have no live price.</strong>{' '}
+              Twelve Data's free plan covers US stocks, forex and crypto — European listings
+              (XETRA, LSE) need a paid plan, which is why {' '}
+              {instruments.filter((i) => problems[i.id] && i.exchange).map((i) => i.symbol).join(', ') || 'some symbols'}{' '}
+              come back empty while US tickers work. Each row below says exactly why, and offers a
+              manual price plus an optional US chart proxy.
+            </span>
           </div>
         )}
 
@@ -307,7 +334,8 @@ export default function MyInvestments() {
             <InstrumentForm
               initial={editingId === 'new' ? EMPTY_FORM : {
                 ...EMPTY_FORM, ...editing,
-                shares: editing.shares || '', avgCost: editing.avgCost || '', manualPrice: editing.manualPrice || '',
+                shares: editing.shares || '', avgCost: editing.avgCost || '',
+                manualPrice: editing.manualPrice || '', chartSymbol: editing.chartSymbol || '',
               }}
               onSave={saveInstrument}
               onCancel={() => setEditingId(null)}
@@ -347,6 +375,11 @@ export default function MyInvestments() {
                     <td className="num">
                       {r.priceInfo.price != null ? cur(r.priceInfo.price, r.currency) : '—'}
                       {r.priceInfo.source === 'manual' && <span className="small muted"> (manual)</span>}
+                      {problems[r.id] && (
+                        <div className="small warn-text" title={problems[r.id].detail}>
+                          {problems[r.id].short}
+                        </div>
+                      )}
                     </td>
                     <td className={'num ' + (r.priceInfo.changePct > 0 ? 'up' : r.priceInfo.changePct < 0 ? 'down' : '')}>
                       {pctFmt(r.priceInfo.changePct)}
@@ -383,7 +416,11 @@ export default function MyInvestments() {
 
         {monitored.map((r) => {
           const sym = requestSymbol(r)
-          const series = sym && liveData?.data?.[sym]
+          const own = sym && liveData?.data?.[sym]
+          const proxySym = chartSymbol(r)
+          const proxy = !own && proxySym ? liveData?.data?.[proxySym] : null
+          const series = own || proxy
+          const problem = problems[r.id]
           const read = reads[r.id]
           return (
             <div className="card" key={r.id}>
@@ -407,15 +444,39 @@ export default function MyInvestments() {
               </div>
 
               {series ? (
-                <div style={{ marginTop: 12 }}><LiveChart series={series} currency={r.currency} /></div>
+                <div style={{ marginTop: 12 }}>
+                  {proxy && (
+                    <p className="small warn-text" style={{ margin: '0 0 8px' }}>
+                      <IconWarning size={13} /> Chart shows <strong>{proxySym}</strong> as a proxy —
+                      your own listing is not on your data plan. Shape and trend are indicative;
+                      the price level and currency are not your holding's, and your value and P&amp;L
+                      above use the manual price instead.
+                    </p>
+                  )}
+                  <LiveChart series={series} currency={proxy ? 'proxy units' : r.currency} />
+                </div>
               ) : (
-                <p className="small muted" style={{ marginTop: 10 }}>
-                  {r.type === 'private'
-                    ? 'Private company — no public price chart exists. Set a manual price to include it in your totals.'
-                    : twelveKey
-                      ? 'No chart data for this symbol on your Twelve Data plan. Set a manual price in Edit, or switch the symbol to a US listing.'
-                      : 'Add a Twelve Data key in Settings to chart this instrument.'}
-                </p>
+                <div className="empty-chart">
+                  <p className="small" style={{ margin: 0 }}>
+                    <strong>{problem?.short || 'No chart data'}</strong>
+                  </p>
+                  <p className="small secondary" style={{ margin: '6px 0 10px' }}>
+                    {problem?.detail || 'Add a Twelve Data key in Settings to chart this instrument.'}
+                  </p>
+                  <div className="row" style={{ gap: 8 }}>
+                    <button className="toggle-chip" onClick={() => setEditingId(r.id)}>
+                      Set manual price
+                    </button>
+                    {problem?.canProxy && proxyHint(r) && !r.chartSymbol && (
+                      <button
+                        className="toggle-chip"
+                        onClick={() => updateInstrument(r.id, { chartSymbol: proxyHint(r).symbol })}
+                      >
+                        Use {proxyHint(r).symbol} as chart proxy
+                      </button>
+                    )}
+                  </div>
+                </div>
               )}
 
               {read && (

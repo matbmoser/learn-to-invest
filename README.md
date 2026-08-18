@@ -186,7 +186,10 @@ stored only in your browser like everything else.
   just sit in the table.
 - **Live charts with selectable styles** — candles, line, area, or baseline, plus ranges, an
   SMA-50 overlay and a volume pane — via your Twelve Data key (US symbols work on the free plan;
-  XETRA/LSE listings need a paid plan, and fall back to manual prices with a clear notice).
+  XETRA/LSE listings need a paid plan, and fall back to manual prices with a clear notice). Every
+  row without a price says exactly why — quoting the API's own message — and offers a manual price
+  plus an optional **US-listed chart proxy** (e.g. BMWYY for BMW) that draws a chart without ever
+  touching your valuation.
 - **Analyst reads via the Claude API** — one click per holding produces a structured educational
   read: what the asset is, how it has been behaving, what an analyst would watch next, the risks
   of *your* position (including overlaps like owning Apple twice through a world ETF), and which
