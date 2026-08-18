@@ -134,7 +134,7 @@ export default function Patterns() {
         The honest way to answer "does this pattern predict anything?" — measure it. Pick a signal
         and this page finds every time it fired historically, then reports what actually happened
         over the next 1 to 60 days, compared against the baseline of every other day. The theory is
-        in <Link to="/learn/prediction/base-rates">Module 5 of the Academy</Link>.
+        in <Link to="/learn/prediction/base-rates">the Prediction module of the Academy</Link>.
       </p>
 
       <div className="notice" style={{ marginBottom: 18 }}>
