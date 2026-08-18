@@ -245,13 +245,19 @@ export function getSeries(ticker) {
       else if (r < 0.6) { regimeDrift = -0.003; regimeVol = 1.6 }    // sell-off
       else { regimeDrift = 0; regimeVol = 1 }                        // calm
     }
+    // Overnight gap: real markets rarely open exactly where they closed, and
+    // occasional news gaps are what make candlestick patterns meaningful.
+    const gapShock = gaussian(rng) * c.vol * regimeVol * 0.35
+    const open = Math.max(1, price * Math.exp(gapShock))
     const shock = gaussian(rng) * c.vol * regimeVol
-    const open = price
-    price = Math.max(1, price * Math.exp(c.drift + regimeDrift + shock))
-    const close = price
-    const wick = Math.abs(gaussian(rng)) * c.vol * regimeVol * 0.7
-    const high = Math.max(open, close) * (1 + wick)
-    const low = Math.min(open, close) * (1 - wick)
+    const close = Math.max(1, open * Math.exp(c.drift + regimeDrift + shock))
+    price = close
+    // Wicks are drawn independently, so a bar can reject from one side only —
+    // the asymmetry that hammers and shooting stars are made of.
+    const upWick = Math.abs(gaussian(rng)) * c.vol * regimeVol * 0.6
+    const dnWick = Math.abs(gaussian(rng)) * c.vol * regimeVol * 0.6
+    const high = Math.max(open, close) * (1 + upWick)
+    const low = Math.min(open, close) * (1 - dnWick)
     const volume = Math.round(1e6 * (0.6 + rng() * 0.8) * (1 + Math.abs(shock) * 30))
     out.push({ date: days[i], open, high, low, close, volume })
   }
