@@ -690,3 +690,6 @@ code {
 @media (max-width: 760px) {
   .invest-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* research page */
+.row-focus td { background: var(--raised); }

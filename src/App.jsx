@@ -30,12 +30,13 @@ import Mentor from './pages/Mentor.jsx'
 import Indicators from './pages/Indicators.jsx'
 import Patterns from './pages/Patterns.jsx'
 import MyInvestments from './pages/MyInvestments.jsx'
+import Research from './pages/Research.jsx'
 import Footer from './components/Footer.jsx'
 import { useStore } from './lib/store.jsx'
 import {
   IconAcademy, IconDashboard, IconGlossary, IconLogo, IconMarket, IconMentor,
   IconMoon, IconPortfolio, IconPulse, IconSearch, IconSettings, IconSun, IconTools,
-  IconTrade,
+  IconTrade, IconClipboard,
 } from './components/icons.jsx'
 
 const links = [
@@ -48,6 +49,7 @@ const links = [
   { to: '/glossary', icon: IconGlossary, label: 'Glossary' },
   { section: 'Practice' },
   { to: '/invest', icon: IconTrade, label: 'My investments' },
+  { to: '/research', icon: IconClipboard, label: 'Research' },
   { to: '/market', icon: IconMarket, label: 'Market' },
   { to: '/portfolio', icon: IconPortfolio, label: 'Portfolio' },
   { to: '/tools', icon: IconTools, label: 'Tools' },
@@ -111,6 +113,7 @@ export default function App() {
           <Route path="/indicators" element={<Indicators />} />
           <Route path="/patterns" element={<Patterns />} />
           <Route path="/invest" element={<MyInvestments />} />
+          <Route path="/research" element={<Research />} />
         </Routes>
         <Footer />
       </main>

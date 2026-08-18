@@ -17,6 +17,7 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 - [Pattern lab](#pattern-lab) — back-test 22 signals against their own baseline
 - [AI Mentor](#ai-mentor) — chat with a senior analyst about your own portfolio
 - [My investments](#my-investments) — track your real holdings, with live charts and analyst reads
+- [Research](#research) — one company under the microscope, on a shared comparison chart
 - [Market simulator](#market-simulator) — TradingView candlestick charts, indicators, fundamentals
 - [Paper trading](#paper-trading) — a virtual $10,000 portfolio with risk feedback
 - [Analyst tools](#analyst-tools) — position sizing, risk/reward, compounding, DCF
@@ -195,6 +196,30 @@ stored only in your browser like everything else.
 - Totals are shown in EUR, with USD positions converted at the live EUR/USD rate.
 
 ![My investments charts](docs/screenshots/invest-charts.png)
+
+---
+
+## Research
+
+An interactive research dashboard built around one idea: **change the company you are researching,
+and every panel follows — but the comparison chart is shared.** Companies you pin stay drawn on it
+while you move between targets, so the side-by-side context survives the whole session (and a
+reload).
+
+![Research](docs/screenshots/research.png)
+
+- **Shared normalized chart** — every line starts at 0% at the start of the range, so a $9 stock
+  and a $400 stock compare fairly. Pin and unpin companies as chips; the researched one is drawn
+  thicker.
+- **Snapshot panel** — price, 1M/1Y performance, volatility, worst drawdown, position in the
+  52-week range.
+- **Live indicator readings** — SMA structure, RSI, MACD, ADX, ATR and OBV, each as a plain-English
+  sentence with a bullish/bearish/neutral pill, recomputed for whichever company is selected.
+- **Fundamentals & health score**, with jump links to the full chart page and to the AI mentor
+  pre-focused on the company.
+- **Relative performance table** for the researched company against everything pinned.
+- **Per-company research notes** — the Academy's watchlist discipline made concrete: write the
+  thesis, the price you'd pay, and what would change your mind; notes persist per ticker.
 
 ---
 

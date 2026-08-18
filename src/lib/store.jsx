@@ -45,6 +45,9 @@ const defaultState = {
   // instruments they actually own, its own analyst chat, and cached
   // analyst reads keyed by instrument id.
   realPortfolio: { instruments: null, chat: [], reads: {} },
+  // Research dashboard: which company is under the microscope, which are
+  // pinned onto the shared comparison chart, and per-ticker research notes.
+  research: { ticker: '', pins: [], notes: {} },
 }
 
 function load() {
@@ -132,6 +135,17 @@ export function StoreProvider({ children }) {
     refreshLiveData() {
       clearLiveCache()
       setReloadCounter((c) => c + 1)
+    },
+
+    setResearch(patch) {
+      setState((s) => ({ ...s, research: { ...s.research, ...patch } }))
+    },
+
+    setResearchNote(ticker, text) {
+      setState((s) => ({
+        ...s,
+        research: { ...s.research, notes: { ...s.research.notes, [ticker]: text } },
+      }))
     },
 
     addInstrument(inst) {
