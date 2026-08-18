@@ -166,4 +166,16 @@ export const GLOSSARY = [
   { term: 'Total return', def: 'Price change plus dividends and other payouts. The only fair way to compare a dividend payer with a growth stock.' },
   { term: 'Trailing stop', def: 'A stop-loss that ratchets up as the price rises, locking in gains while letting a winner run. Automates "let it run, but cap the give-back."' },
   { term: 'Watchlist', def: 'The short list of researched companies you would own at the right price. The wall between analysis and impulse: only ever buy from it.' },
+
+  // --- Retail leverage products ---
+  { term: 'Factor certificate', def: 'A product delivering a constant multiple (e.g. 3x) of the underlying\'s DAILY return, reset each day. Volatility drag erodes it in choppy markets even when the underlying ends flat.' },
+  { term: 'Financing cost (certificates)', def: 'The daily charge built into open-end leverage products — the strike creeps toward the price, so a sideways underlying slowly bleeds the holder.' },
+  { term: 'Implied volatility', def: 'The market\'s priced-in expectation of future movement, embedded in option and warrant prices. If excitement fades, a warrant can fall while the stock rises.' },
+  { term: 'Issuer risk', def: 'Certificates and warrants are debt notes of the issuing bank, not shares. If the issuer failed, the product could too — regardless of the underlying.' },
+  { term: 'Knock-out certificate', def: 'A leveraged note (turbo, mini future) that terminates immediately and permanently if the underlying touches its barrier — at zero or a small residual, with no recovery possible.' },
+  { term: 'Knockout barrier', def: 'The tripwire price of a knockout product. Closer barrier = higher leverage = shorter expected life. Overnight gaps can jump it, settling far through the level.' },
+  { term: 'Open end', def: 'A certificate with no fixed expiry. Not free: financing costs accrue daily, so time itself has a price.' },
+  { term: 'Time decay (theta)', def: 'The daily loss of an option\'s or warrant\'s time value, accelerating toward expiry. Being right slowly is a losing trade in decaying instruments.' },
+  { term: 'Volatility drag', def: 'The arithmetic loss from compounding leveraged daily returns through chop: +30% then -27.3% is -5.5%, not zero. The structural enemy of factor certificates held long.' },
+  { term: 'Warrant', def: 'A securitized call or put option issued by a bank: strike, expiry, premium. Priced by direction, time AND implied volatility — you must be right about all three.' },
 ]

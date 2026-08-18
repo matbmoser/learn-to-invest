@@ -12,7 +12,7 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Contents
 
-- [Investing Academy](#investing-academy) — 11 modules, 66 lessons, quizzes
+- [Investing Academy](#investing-academy) — 11 modules, 67 lessons, quizzes
 - [Indicator reference](#indicator-reference) — all 17 indicators, drawn and explained
 - [Pattern lab](#pattern-lab) — back-test 22 signals against their own baseline
 - [AI Mentor](#ai-mentor) — chat with a senior analyst about your own portfolio
@@ -26,7 +26,7 @@ No backend, no accounts, no real money at risk. Everything runs in your browser.
 
 ## Investing Academy
 
-Eleven modules and 66 lessons that take you from "what is a stock?" to writing professional
+Eleven modules and 67 lessons that take you from "what is a stock?" to writing professional
 investment theses — modelled on the arc of full investing curricula: foundations → concepts →
 analysis → charts → timing → events → risk → decisions → psychology. Each module ends with a
 quiz, and your progress is saved locally.
@@ -34,7 +34,7 @@ quiz, and your progress is saved locally.
 | # | Module | What you learn |
 |---|--------|----------------|
 | 1 | **Investing Foundations** | What a stock is, how markets and orders work, and how to set yourself up safely before risking a dollar |
-| 2 | **Financial Concepts** *(basic → advanced)* | Time value of money and compounding, inflation and real returns, interest rates and the economic cycle, bonds and the yield curve, the mathematics of risk (volatility, correlation, beta, CAPM, Sharpe), cost of capital and WACC vs ROIC, and instruments from ETFs to options, leverage and short selling |
+| 2 | **Financial Concepts** *(basic → advanced)* | Time value of money and compounding, inflation and real returns, interest rates and the economic cycle, bonds and the yield curve, the mathematics of risk (volatility, correlation, beta, CAPM, Sharpe), cost of capital and WACC vs ROIC, instruments from ETFs to options, leverage and short selling, and the retail leverage shelf — knockouts, warrants and factor certificates — with the arithmetic of why the house usually wins |
 | 3 | **Fundamental Analysis** | The three financial statements, valuation ratios (P/E, P/S), health ratios, moats, and a repeatable analysis checklist |
 | 4 | **Reading Charts from Zero** | What a chart actually records, how a candlestick is built from four prices, timeframes and aggregation, volume as a conviction meter, log scales / gaps / adjusted prices, and a repeatable five-step chart read |
 | 5 | **Technical Analysis & Timing** | Trends and support/resistance, moving averages, the four families of indicators, oscillators compared, trend strength with ADX, volatility and volume tools, building a non-redundant indicator set, and honest buy/sell signals |
@@ -56,6 +56,12 @@ The Financial Concepts module runs from first principles to the machinery profes
 like discounting, duration and cost of capital are already familiar when later modules rely on them.
 
 ![Financial concepts lesson](docs/screenshots/lesson-concepts.png)
+
+That module ends with a field guide to the leverage products modern broker apps put one tap away —
+knockout certificates, warrants and factor certificates — what each one is, the arithmetic of
+knockout barriers and volatility drag, and why the costs are structural rather than bad luck.
+
+![Leverage products lesson](docs/screenshots/lesson-leverage.png)
 
 ![Indicator lesson](docs/screenshots/lesson-indicators.png)
 
@@ -201,7 +207,7 @@ safety.
 
 ![Tools](docs/screenshots/tools.png)
 
-There's also a searchable 145-term glossary in plain English.
+There's also a searchable 155-term glossary in plain English.
 
 ![Glossary](docs/screenshots/glossary.png)
 
