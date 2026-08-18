@@ -220,6 +220,11 @@ reload).
 - **Relative performance table** for the researched company against everything pinned.
 - **Per-company research notes** — the Academy's watchlist discipline made concrete: write the
   thesis, the price you'd pay, and what would change your mind; notes persist per ticker.
+- **A research analyst chat docked on the right**, with an **"Analyse my situation"** button in the
+  top-right corner: one click streams a structured read of everything on the dashboard — the
+  researched company's numbers and indicator states, your pinned comparisons, your own notes, and
+  your real portfolio — ending with concrete next steps and the Academy lesson that fills your
+  biggest current gap. Tips and follow-up questions continue in the same chat.
 
 ---
 

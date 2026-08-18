@@ -25,6 +25,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Markdown from '../components/markdown.jsx'
 import LiveChart from '../components/LiveChart.jsx'
+import AnalystDock from '../components/AnalystDock.jsx'
 import { askMentor, MENTOR_MODELS } from '../lib/mentor.js'
 import {
   buildRealContext, clearRealCache, fetchRealData, getCachedRealData,
@@ -32,8 +33,7 @@ import {
 } from '../lib/realportfolio.js'
 import { useStore } from '../lib/store.jsx'
 import {
-  IconCheck, IconMentor, IconPulse, IconRefresh, IconSend,
-  IconStop, IconTrade, IconWarning, IconX,
+  IconCheck, IconMentor, IconPulse, IconRefresh, IconTrade, IconWarning, IconX,
 } from '../components/icons.jsx'
 
 const cur = (n, c = 'EUR', digits = 2) =>
@@ -111,140 +111,8 @@ function InstrumentForm({ initial, onSave, onCancel }) {
   )
 }
 
-function AnalystDock({ open, setOpen, context }) {
-  const { state, updateSettings, setRealChat } = useStore()
-  const [input, setInput] = useState('')
-  const [streaming, setStreaming] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState(null)
-  const abortRef = useRef(null)
-  const endRef = useRef(null)
-
-  const history = state.realPortfolio.chat || []
-  const apiKey = state.settings.anthropicKey
-  const model = state.settings.mentorModel || MENTOR_MODELS[0].id
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ block: 'end' })
-  }, [history.length, streaming])
-
-  async function send(question) {
-    const text = (question ?? input).trim()
-    if (!text || busy || !apiKey) return
-    setError(null)
-    setInput('')
-    const next = [...history, { role: 'user', content: text }]
-    setRealChat(next)
-    setBusy(true)
-    setStreaming('')
-    const controller = new AbortController()
-    abortRef.current = controller
-    let acc = ''
-    const res = await askMentor({
-      apiKey, model, history: next, context,
-      onText: (d) => { acc += d; setStreaming(acc) },
-      signal: controller.signal,
-    })
-    abortRef.current = null
-    setBusy(false)
-    setStreaming('')
-    if (res.ok) setRealChat([...next, { role: 'assistant', content: res.text }])
-    else if (res.aborted) {
-      if (acc.trim()) setRealChat([...next, { role: 'assistant', content: acc + '\n\n_(stopped)_' }])
-      else setRealChat(history)
-    } else {
-      setRealChat(history)
-      setInput(text)
-      setError(res.error)
-    }
-  }
-
-  if (!open) {
-    return (
-      <button className="dock-opener" onClick={() => setOpen(true)} aria-label="Open analyst chat">
-        <IconMentor size={16} /> Analyst
-      </button>
-    )
-  }
-
-  return (
-    <aside className="chat-dock card">
-      <div className="row spread" style={{ marginBottom: 8 }}>
-        <strong className="row" style={{ gap: 6 }}><IconMentor size={16} /> Ask the analyst</strong>
-        <div className="row" style={{ gap: 6 }}>
-          {history.length > 0 && (
-            <button className="toggle-chip" onClick={() => setRealChat([])}>New</button>
-          )}
-          <button className="toggle-chip" onClick={() => setOpen(false)} aria-label="Collapse chat">
-            <IconX size={13} />
-          </button>
-        </div>
-      </div>
-
-      {!apiKey ? (
-        <p className="small secondary">
-          The analyst chat needs your Claude API key.{' '}
-          <Link to="/settings">Add it in Settings</Link> — it stays in this browser.
-        </p>
-      ) : (
-        <>
-          <div className="dock-scroll">
-            {history.length === 0 && !streaming && (
-              <div className="toggle-row" style={{ marginBottom: 8 }}>
-                {[
-                  'Review my real portfolio. What stands out?',
-                  'Am I too concentrated in German carmakers?',
-                  'How should I think about my ETF vs my single stocks?',
-                  'What would you check before adding to any position?',
-                ].map((p) => (
-                  <button key={p} className="toggle-chip" onClick={() => send(p)}>{p}</button>
-                ))}
-              </div>
-            )}
-            {history.map((m, i) => (
-              <div key={i} className="chat-turn">
-                <div className={'chat-who ' + (m.role === 'user' ? 'you' : 'analyst')}>
-                  {m.role === 'user' ? 'You' : 'Analyst'}
-                </div>
-                {m.role === 'user'
-                  ? <div className="chat-bubble">{m.content}</div>
-                  : <div className="chat-body small"><Markdown text={m.content} /></div>}
-              </div>
-            ))}
-            {streaming && (
-              <div className="chat-turn">
-                <div className="chat-who analyst">Analyst</div>
-                <div className="chat-body small"><Markdown text={streaming} /></div>
-              </div>
-            )}
-            {busy && !streaming && (
-              <p className="small muted typing-row"><span className="typing"><i /><i /><i /></span> Thinking…</p>
-            )}
-            {error && <p className="small down"><IconWarning size={13} /> {error}</p>}
-            <div ref={endRef} />
-          </div>
-          <form className="row" style={{ marginTop: 8 }} onSubmit={(e) => { e.preventDefault(); send() }}>
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about your holdings…"
-              style={{ flex: 1, minWidth: 0 }}
-              disabled={busy}
-            />
-            {busy ? (
-              <button type="button" onClick={() => abortRef.current?.abort()} aria-label="Stop"><IconStop size={13} /></button>
-            ) : (
-              <button type="submit" className="primary" disabled={!input.trim()} aria-label="Send"><IconSend size={14} /></button>
-            )}
-          </form>
-        </>
-      )}
-    </aside>
-  )
-}
-
 export default function MyInvestments() {
-  const { state, addInstrument, updateInstrument, removeInstrument, setRead } = useStore()
+  const { state, addInstrument, updateInstrument, removeInstrument, setRead, setRealChat } = useStore()
   const instruments = state.realPortfolio.instruments || []
   const reads = state.realPortfolio.reads || {}
   const twelveKey = state.settings.apiKey
@@ -330,7 +198,17 @@ export default function MyInvestments() {
 
   return (
     <div className="invest-layout">
-      <AnalystDock open={dockOpen} setOpen={setDockOpen} context={context} />
+      <AnalystDock
+        open={dockOpen} setOpen={setDockOpen} context={context}
+        history={state.realPortfolio.chat || []} setHistory={setRealChat}
+        placeholder="Ask about your holdings…"
+        suggestions={[
+          'Review my real portfolio. What stands out?',
+          'Am I too concentrated in German carmakers?',
+          'How should I think about my ETF vs my single stocks?',
+          'What would you check before adding to any position?',
+        ]}
+      />
 
       <div className="invest-main">
         <div className="row spread" style={{ flexWrap: 'wrap', gap: 10 }}>

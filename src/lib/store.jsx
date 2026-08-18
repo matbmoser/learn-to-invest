@@ -47,7 +47,7 @@ const defaultState = {
   realPortfolio: { instruments: null, chat: [], reads: {} },
   // Research dashboard: which company is under the microscope, which are
   // pinned onto the shared comparison chart, and per-ticker research notes.
-  research: { ticker: '', pins: [], notes: {} },
+  research: { ticker: '', pins: [], notes: {}, chat: [] },
 }
 
 function load() {
@@ -139,6 +139,13 @@ export function StoreProvider({ children }) {
 
     setResearch(patch) {
       setState((s) => ({ ...s, research: { ...s.research, ...patch } }))
+    },
+
+    setResearchChat(history) {
+      setState((s) => ({
+        ...s,
+        research: { ...s.research, chat: history.slice(-30) },
+      }))
     },
 
     setResearchNote(ticker, text) {

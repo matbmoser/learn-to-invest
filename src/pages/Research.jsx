@@ -26,10 +26,12 @@ import { Link } from 'react-router-dom'
 import { CrosshairMode, LineSeries, LineStyle, createChart } from 'lightweight-charts'
 import { getIndicator } from '../data/indicatorGuide.js'
 import { annualizedVol, maxDrawdown } from '../lib/indicators.js'
-import { getCompanies, getFundamentals, getQuote, getSeries, healthScore } from '../lib/market.js'
+import { getCompanies, getFundamentals, getQuote, getSeries, healthScore, isLiveMode } from '../lib/market.js'
+import AnalystDock from '../components/AnalystDock.jsx'
+import { realSummary } from '../lib/realportfolio.js'
 import { useStore } from '../lib/store.jsx'
 import {
-  IconClipboard, IconMentor, IconPulse, IconSearch, IconTag, IconX,
+  IconBulb, IconClipboard, IconMentor, IconPulse, IconSearch, IconTag, IconX,
 } from '../components/icons.jsx'
 
 const RANGES = { '3M': 63, '6M': 126, '1Y': 252, All: Infinity }
@@ -109,7 +111,7 @@ function CompareChart({ tickers, focus, range }) {
 }
 
 export default function Research() {
-  const { state, dataVersion, setResearch, setResearchNote } = useStore()
+  const { state, dataVersion, setResearch, setResearchNote, setResearchChat } = useStore()
   const companies = getCompanies()
   const research = state.research || { ticker: '', pins: [], notes: {} }
 
@@ -137,6 +139,56 @@ export default function Research() {
   const hi52 = Math.max(...closes.slice(-252))
   const lo52 = Math.min(...closes.slice(-252))
   const note = research.notes?.[ticker] || ''
+  const [dockOpen, setDockOpen] = useState(true)
+  const dockRef = useRef(null)
+
+  // Everything the analyst can see from this dashboard: the researched
+  // company's numbers, the pinned comparisons, the user's own notes, and a
+  // light summary of their real portfolio for "my situation" questions.
+  const context = useMemo(() => {
+    const lines = []
+    lines.push('# RESEARCH DASHBOARD STATE')
+    lines.push(`Market mode: ${isLiveMode() ? 'LIVE' : 'SIMULATED (fictional companies)'}`)
+    lines.push(`The user is researching ${ticker} — ${company?.name || ''} (${company?.sector || 'n/a'}).`)
+    if (quote) lines.push(`Price ${quote.price.toFixed(2)} (${pctFmt(quote.changePct, 2)} today), 1M ${pctFmt(perfOver(closes, 21))}, 1Y ${pctFmt(perfOver(closes, 252))}, ann. vol ${(annualizedVol(closes.slice(-252)) * 100).toFixed(0)}%, worst 1Y drawdown -${(maxDrawdown(closes.slice(-252)) * 100).toFixed(0)}%, 52w range ${lo52.toFixed(2)}-${hi52.toFixed(2)}.`)
+    for (const r of readings) lines.push(`- ${r.name}: [${r.state}] ${r.text}`)
+    if (fundamentals) {
+      lines.push(`Fundamentals: revenue $${fundamentals.revenue}B (${pctFmt(fundamentals.revenueGrowth)}), net margin ${fundamentals.netMargin}%, P/E ${fundamentals.peRatio ? fundamentals.peRatio.toFixed(1) : 'n/a'}, P/S ${fundamentals.psRatio.toFixed(1)}, D/E ${fundamentals.debtToEquity}, ROE ${fundamentals.roe}%, FCF margin ${fundamentals.fcfMargin}%, dividend ${fundamentals.dividendYield}%${health ? `, health score ${health.total}/100` : ''}.`)
+    }
+    if (pins.length) {
+      lines.push('Pinned comparisons on the shared chart:')
+      for (const t of pins) {
+        const c = getSeries(t).map((d) => d.close)
+        lines.push(`- ${t}: 1M ${pctFmt(perfOver(c, 21))}, 3M ${pctFmt(perfOver(c, 63))}, 1Y ${pctFmt(perfOver(c, 252))}`)
+      }
+    }
+    if (note.trim()) lines.push(`The user's own research notes on ${ticker}: "${note.trim()}"`)
+    const notedTickers = Object.entries(research.notes || {}).filter(([t, v]) => t !== ticker && v?.trim())
+    if (notedTickers.length) lines.push(`They also keep notes on: ${notedTickers.map(([t]) => t).join(', ')}.`)
+    const rp = state.realPortfolio?.instruments
+    if (rp?.length) {
+      const sum = realSummary(rp, null)
+      const owned = sum.rows.filter((r) => r.shares > 0)
+      if (owned.length) {
+        lines.push('Their REAL portfolio (from the My investments page — real money, teach, never instruct):')
+        for (const r of owned) lines.push(`- ${r.name}${r.symbol ? ` (${r.symbol})` : ''}: ${r.shares} shares${r.avgCost ? `, avg cost ${r.avgCost} ${r.currency}` : ''}`)
+      }
+    }
+    const doneLessons = Object.keys(state.completedLessons || {}).length
+    lines.push(`Curriculum progress: ${doneLessons} lessons completed.`)
+    return lines.join('\n')
+  }, [ticker, company, quote, closes, readings, fundamentals, health, pins.join(','), note, state.realPortfolio, state.completedLessons, lo52, hi52])
+
+  function analyseSituation() {
+    dockRef.current?.send(
+      'Analyse my situation using everything you can see: the company I am researching, its ' +
+      'indicators and fundamentals, my pinned comparisons, my research notes, and my real ' +
+      'portfolio. Give me: 1) the two or three things that stand out most, 2) what a ' +
+      'professional analyst would check next before forming a view, 3) concrete next steps for ' +
+      'ME — what to research, which app tool to use, and which Academy lesson fills my biggest ' +
+      'current gap. Teach me the reasoning; do not tell me to buy or sell anything.'
+    )
+  }
 
   function pin(t) {
     if (!research.pins?.includes(t)) setResearch({ pins: [...(research.pins || []), t] })
@@ -146,7 +198,8 @@ export default function Research() {
   }
 
   return (
-    <div>
+    <div className="invest-layout">
+      <div className="invest-main">
       <div className="row spread" style={{ flexWrap: 'wrap', gap: 10 }}>
         <div>
           <h1 style={{ marginBottom: 4 }}><IconClipboard size={24} /> Research</h1>
@@ -155,7 +208,7 @@ export default function Research() {
             shared: pinned companies stay on it while you move between targets.
           </p>
         </div>
-        <div className="row">
+        <div className="row" style={{ flexWrap: 'wrap' }}>
           <label htmlFor="research-ticker" style={{ margin: 0 }} className="small muted">Researching</label>
           <select
             id="research-ticker"
@@ -166,6 +219,9 @@ export default function Research() {
           </select>
           <button onClick={() => pin(ticker)} disabled={research.pins?.includes(ticker)}>
             <IconTag size={13} /> Pin to chart
+          </button>
+          <button className="primary" onClick={analyseSituation}>
+            <IconBulb size={14} /> Analyse my situation
           </button>
         </div>
       </div>
@@ -311,6 +367,21 @@ export default function Research() {
           style={{ width: '100%', resize: 'vertical' }}
         />
       </div>
+      </div>
+
+      <AnalystDock
+        ref={dockRef}
+        open={dockOpen} setOpen={setDockOpen} context={context}
+        history={research.chat || []} setHistory={setResearchChat}
+        title="Research analyst"
+        placeholder={`Ask about ${ticker}…`}
+        suggestions={[
+          `Give me three tips for researching ${ticker} properly.`,
+          `What is the biggest risk the numbers show for ${ticker}?`,
+          'Which of my pinned companies looks strongest, and why?',
+          'Critique my research notes like a senior analyst.',
+        ]}
+      />
     </div>
   )
 }
