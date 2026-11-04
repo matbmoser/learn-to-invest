@@ -734,3 +734,10 @@ code {
 .wealth-badge .stat-label { font-size: 10px; }
 .wealth-badge .wealth-total { font-size: 16px; font-weight: 700; color: var(--text-primary); }
 .wealth-badge .small { margin-top: 1px; }
+
+/* live-data diagnostics */
+.warn-text { color: var(--series-4); }
+.empty-chart {
+  margin-top: 12px; padding: 14px;
+  background: var(--raised); border: 1px dashed var(--baseline); border-radius: 10px;
+}
