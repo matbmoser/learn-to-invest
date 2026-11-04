@@ -16,7 +16,7 @@
 //
 // This file was generated with AI assistance (Claude Code, Anthropic).
 
-import paypalQr from '../../docs/screenshots/buymeacoffeepaypal.png'
+import paypalQr from '../../docs/screenshots/buymeacoffee.jpeg'
 import { IconCoffee, IconHeart, IconStar } from './icons.jsx'
 
 const REPO = 'https://github.com/matbmoser/learn-to-invest'
