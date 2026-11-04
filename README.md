@@ -359,7 +359,7 @@ If this project helps you learn to invest, you can
 [buy me a coffee with PayPal](https://paypal.me/mathiasbrunkowmoser).
 
 <a href="https://paypal.me/mathiasbrunkowmoser">
-  <img src="docs/screenshots/buymeacoffeepaypal.png" width="180" alt="PayPal QR code for Mathias Brunkow Moser">
+  <img src="docs/screenshots/buymeacoffee.jpeg" width="180" alt="PayPal QR code for Mathias Brunkow Moser">
 </a>
 
 Made with ♥ by [Mathias Brunkow Moser](https://github.com/matbmoser).
